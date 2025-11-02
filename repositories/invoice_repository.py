@@ -1,0 +1,21 @@
+from ast import Dict
+from typing import Optional
+
+from models.invoice import Invoice
+
+
+class InvoiceRepository:
+    """
+    Gère le stockage des factures.
+    """
+    
+    def __init__(self):
+        self._by_id: Dict[str, Invoice] = {}
+
+    def add(self, invoice: Invoice):
+        """Ajoute une nouvelle facture."""
+        self._by_id[invoice.id] = invoice
+
+    def get(self, invoice_id: str) -> Optional[Invoice]:
+        """Récupère une facture par son ID."""
+        return self._by_id.get(invoice_id)

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Produits — MaBoutique{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-4 text-center">Nos Produits</h2>
+
+  <div class="row g-4">
+    {% for product in products %}
+      <div class="col-md-3 col-sm-6">
+        <div class="card h-100 shadow-sm">
+          <img src="{{ product.image_url or url_for('static', filename='img/default-product.jpg') }}" 
+               class="card-img-top" alt="{{ product.name }}">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ product.name }}</h5>
+            <p class="card-text text-muted small">{{ product.description }}</p>
+            <div class="mt-auto">
+              <p class="fw-bold mb-2">{{ "%.2f"|format(product.price_cents / 100) }} €</p>
+              <form method="post" action="{{ url_for('cart.add', product_id=product.id) }}">
+                <button type="submit" class="btn btn-primary w-100">
+                  <i class="bi bi-cart-plus"></i> Ajouter au panier
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="col-12 text-center text-muted py-5">
+        <p>Aucun produit disponible pour le moment.</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

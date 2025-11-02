@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Accueil — MaBoutique{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+  <h1 class="fw-bold mb-3">Bienvenue sur MaBoutique 🛍️</h1>
+  <p class="lead text-muted mb-4">Découvrez nos derniers produits et offres exclusives.</p>
+  <a href="{{ url_for('catalog.products') }}" class="btn btn-primary px-4">Voir le catalogue</a>
+</div>
+{% endblock %}

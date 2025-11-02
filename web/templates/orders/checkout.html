@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Passer la commande — MaBoutique{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">🛒 Passer la commande</h2>
+
+    {% if total %}
+        <div class="card p-4 mb-4">
+            <h4>Total à payer : <strong>{{ "%.2f"|format(total) }} €</strong></h4>
+        </div>
+
+        <form action="{{ url_for('orders.checkout') }}" method="post">
+            <div class="mb-3">
+                <label for="card_number" class="form-label">Numéro de carte</label>
+                <input type="text" class="form-control" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" required>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col">
+                    <label for="exp_month" class="form-label">Mois d'expiration</label>
+                    <input type="number" class="form-control" id="exp_month" name="exp_month" min="1" max="12" required>
+                </div>
+                <div class="col">
+                    <label for="exp_year" class="form-label">Année d'expiration</label>
+                    <input type="number" class="form-control" id="exp_year" name="exp_year" min="2025" max="2100" required>
+                </div>
+                <div class="col">
+                    <label for="cvc" class="form-label">CVC</label>
+                    <input type="text" class="form-control" id="cvc" name="cvc" placeholder="123" maxlength="4" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success">Payer {{ "%.2f"|format(total) }} €</button>
+            <a href="{{ url_for('cart.view') }}" class="btn btn-secondary ms-2">Retour au panier</a>
+        </form>
+    {% else %}
+        <div class="alert alert-info">Votre panier est vide. <a href="{{ url_for('catalog.products') }}">Voir les produits</a></div>
+    {% endif %}
+</div>
+{% endblock %}

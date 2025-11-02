@@ -1,0 +1,147 @@
+:root {
+  --accent: #0d6efd;
+  --text-color: #212529;
+  --muted-color: #6c757d;
+  --bg-light: #f8f9fa;
+  --bg-white: #ffffff;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg-light);
+  color: var(--text-color);
+  scroll-behavior: smooth;
+}
+
+/* --- Navbar --- */
+.navbar {
+  background-color: var(--bg-white);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.navbar-brand {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.nav-link.active,
+.nav-link:hover {
+  color: var(--accent) !important;
+}
+
+/* --- Cards --- */
+.card {
+  border: none;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease-in-out;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.06);
+}
+.card img {
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+}
+
+/* --- Produits --- */
+.product-card img {
+  height: 200px;
+  object-fit: cover;
+  border-bottom: 1px solid #eee;
+}
+.product-card .card-title {
+  font-size: 0.95rem;
+}
+.product-card .btn {
+  font-size: 0.8rem;
+}
+
+/* --- Boutons --- */
+.btn-primary {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  font-weight: 500;
+}
+.btn-primary:hover {
+  background-color: #0b5ed7;
+}
+.btn-outline-primary {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.btn-outline-primary:hover {
+  background-color: var(--accent);
+  color: #fff;
+}
+
+/* --- Inputs & Formulaires --- */
+.form-control,
+.form-select {
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+}
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
+}
+
+/* --- Login / Auth pages --- */
+.card.shadow-sm {
+  border-radius: 0.75rem;
+}
+.card .form-label {
+  font-weight: 500;
+  color: var(--muted-color);
+}
+.card .btn-primary {
+  font-weight: 600;
+}
+.card hr {
+  opacity: 0.1;
+}
+.text-center a {
+  color: var(--accent);
+}
+.text-center a:hover {
+  text-decoration: underline;
+}
+
+/* --- Panier --- */
+.list-group-item {
+  border: none;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+/* --- Toasts --- */
+.toast {
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  animation: fadeInOut 2s ease forwards;
+}
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  10%, 90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* --- Footer --- */
+footer {
+  background-color: var(--bg-white);
+  border-top: 1px solid #eee;
+  color: var(--muted-color);
+  padding: 1rem 0;
+  font-size: 0.875rem;
+}
+
+/* --- Petites adaptations responsive --- */
+@media (max-width: 576px) {
+  .product-card img {
+    height: 160px;
+  }
+  .navbar-brand {
+    font-size: 1rem;
+  }
+}

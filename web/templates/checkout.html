@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Paiement — MaBoutique{% endblock %}
+{% block content %}
+  <h2 class="h4 mb-3">Récapitulatif et paiement</h2>
+  <div class="row">
+    <div class="col-md-7">
+      <form method="post" action="{{ url_for('order.place') }}">
+        <!-- adresse, contact -->
+        <div class="mb-3">
+          <label class="form-label">Adresse de livraison</label>
+          <input name="address" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Méthode de paiement</label>
+          <select name="payment_method" class="form-select">
+            <option value="card">Carte bancaire</option>
+            <option value="paypal">PayPal</option>
+          </select>
+        </div>
+        <button class="btn btn-primary">Payer {{ cart.total }} €</button>
+      </form>
+    </div>
+    <div class="col-md-5">
+      <div class="card p-3">
+        <h6>Résumé</h6>
+        <ul class="list-unstyled small">
+          {% for it in cart.items %}
+            <li>{{ it.product.name }} × {{ it.quantity }} — {{ it.product.price*it.quantity }} €</li>
+          {% endfor %}
+        </ul>
+        <hr>
+        <div class="fw-bold">Total: {{ cart.total }} €</div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

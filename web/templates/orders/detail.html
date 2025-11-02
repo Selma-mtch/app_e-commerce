@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Détail de la commande — MaBoutique{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">📦 Détail de la commande {{ order.id[:8] }}…</h2>
+
+    <div class="card p-4 mb-4">
+        <h5>Statut : 
+            <span class="badge bg-primary">{{ order.status.name }}</span>
+        </h5>
+        <p>Créée le : {{ order.created_at|datetimeformat }}</p>
+        {% if order.paid_at %}<p>Paiement effectué le : {{ order.paid_at|datetimeformat }}</p>{% endif %}
+        {% if order.shipped_at %}<p>Expédiée le : {{ order.shipped_at|datetimeformat }}</p>{% endif %}
+        {% if order.delivered_at %}<p>Livrée le : {{ order.delivered_at|datetimeformat }}</p>{% endif %}
+        {% if order.cancelled_at %}<p>Annulée le : {{ order.cancelled_at|datetimeformat }}</p>{% endif %}
+        {% if order.refunded_at %}<p>Remboursée le : {{ order.refunded_at|datetimeformat }}</p>{% endif %}
+        {% if order.delivery %}
+            <p>Transporteur : {{ order.delivery.carrier }}</p>
+            <p>Adresse de livraison : {{ order.delivery.address }}</p>
+            {% if order.delivery.tracking_number %}
+                <p>Numéro de suivi : {{ order.delivery.tracking_number }}</p>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <h4>Articles commandés :</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Quantité</th>
+                <th>Prix unitaire</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order.items %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ "%.2f"|format(item.unit_price_cents/100) }} €</td>
+                <td>{{ "%.2f"|format((item.unit_price_cents*item.quantity)/100) }} €</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="3" class="text-end">Total :</th>
+                <th>{{ "%.2f"|format(order.total_cents()/100) }} €</th>
+            </tr>
+        </tfoot>
+    </table>
+
+    <a href="{{ url_for('orders.list_orders') }}" class="btn btn-secondary">Retour à mes commandes</a>
+</div>
+{% endblock %}

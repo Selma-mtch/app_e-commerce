@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Nouveau ticket — Support{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">📩 Créer un nouveau ticket</h2>
+
+  <form method="POST" class="row g-3">
+    <div class="col-md-6">
+      <label for="subject" class="form-label">Sujet</label>
+      <input type="text" class="form-control" id="subject" name="subject" required>
+    </div>
+
+    <div class="col-md-6">
+      <label for="order_id" class="form-label">Commande (optionnel)</label>
+      <select class="form-select" id="order_id" name="order_id">
+        <option value="">Aucune</option>
+        {% for order in orders %}
+          <option value="{{ order.id }}">Commande #{{ order.id }} — {{ order.status }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-12">
+      <label for="message" class="form-label">Message</label>
+      <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+    </div>
+
+    <div class="col-12">
+      <button type="submit" class="btn btn-primary">Envoyer</button>
+      <a href="{{ url_for('support.threads') }}" class="btn btn-secondary">Annuler</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

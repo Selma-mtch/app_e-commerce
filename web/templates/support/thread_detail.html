@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Ticket — {{ thread.subject }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">💬 {{ thread.subject }}</h2>
+  
+  <p><strong>Commande :</strong> {{ thread.order_id or 'Aucune' }}</p>
+  <p>
+    <strong>Status :</strong>
+    {% if thread.closed %}
+      <span class="badge bg-secondary">Fermé</span>
+    {% else %}
+      <span class="badge bg-success">Ouvert</span>
+    {% endif %}
+  </p>
+  
+  <div class="mb-4">
+    {% for message in thread.messages %}
+      <div class="card mb-2 {% if message.author_user_id == session.get('user_id') %}bg-light{% endif %}">
+        <div class="card-body">
+          <small class="text-muted">
+            {% if message.author_user_id %}
+              Vous
+            {% else %}
+              Support
+            {% endif %}
+            — {{ message.created_at | datetimeformat }}
+          </small>
+          <p class="mb-0">{{ message.body }}</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  {% if not thread.closed %}
+    <form method="POST" action="{{ url_for('support.thread_detail', thread_id=thread.id) }}">
+      <div class="mb-3">
+        <label for="reply" class="form-label">Répondre</label>
+        <textarea class="form-control" id="reply" name="message" rows="4" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Envoyer</button>
+    </form>
+  {% endif %}
+
+  <a href="{{ url_for('support.threads') }}" class="btn btn-secondary mt-3">Retour aux tickets</a>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Mon compte{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-primary text-white text-center rounded-top-4">
+          <h4 class="mb-0">Mon compte</h4>
+        </div>
+        <div class="card-body bg-light">
+          <div class="d-flex align-items-center mb-3">
+            <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center me-3" style="width:60px; height:60px; font-size:1.5rem;">
+              {{ current_user.first_name[0]|upper }}{{ current_user.last_name[0]|upper }}
+            </div>
+            <div>
+              <h5 class="mb-0">{{ current_user.first_name }} {{ current_user.last_name }}</h5>
+              <small class="text-muted">{{ current_user.email }}</small>
+            </div>
+          </div>
+
+          <hr>
+
+          <div class="mb-3">
+            <h6 class="text-secondary">Adresse :</h6>
+            <form method="post" class="d-flex align-items-center" action="{{ url_for('auth.profile') }}">
+              <input type="text" class="form-control me-2" name="address" value="{{ current_user.address or '' }}" placeholder="Votre adresse">
+              <button type="submit" class="btn btn-primary">Mettre à jour</button>
+            </form>
+          </div>
+
+
+          <div class="text-center mt-4">
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger px-4">Se déconnecter</a>
+            <a href="{{ url_for('catalog.products') }}" class="btn btn-primary px-4 ms-2">Retour à la boutique</a>
+            <a href="{{ url_for('orders.list_orders') }}" class="btn btn-success px-4 ms-2">Mes commandes</a>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

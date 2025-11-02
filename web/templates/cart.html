@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Panier — MaBoutique{% endblock %}
+{% block content %}
+  <h2 class="h4 mb-3">Ton panier</h2>
+  {% if cart.items %}
+    <div class="list-group">
+      {% for item in cart.items %}
+        <div class="list-group-item d-flex align-items-center">
+          <img src="{{ item.product.image_url }}" class="me-3 rounded" style="width:64px;height:64px;object-fit:cover;">
+          <div class="flex-grow-1">
+            <div class="fw-bold">{{ item.product.name }}</div>
+            <div class="small text-muted">{{ item.product.price }} € x {{ item.quantity }}</div>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <input type="number" class="form-control form-control-sm qty-input" value="{{ item.quantity }}" min="1" data-line-id="{{ item.id }}" hx-post="{{ url_for('cart.update') }}" hx-include="closest .list-group-item" hx-vals='{"line_id": "{{ item.id }}"}' hx-trigger="change" hx-swap="none">
+            <button class="btn btn-sm btn-outline-danger" hx-post="{{ url_for('cart.remove', product_id=item.id) }}" hx-swap="none" hx-on="htmx:afterRequest: removeCartRow(this)">Supprimer</button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="mt-4 d-flex justify-content-end align-items-center gap-3">
+      <div class="fw-bold">Total: {{ cart.total }} €</div>
+      <a class="btn btn-success" href="{{ url_for('order.checkout') }}">Passer la commande</a>
+    </div>
+  {% else %}
+    <div class="alert alert-info">Ton panier est vide. <a href="{{ url_for('catalog.index') }}">Voir les produits</a></div>
+  {% endif %}
+{% endblock %}

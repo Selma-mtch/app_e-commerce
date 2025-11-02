@@ -1,0 +1,14 @@
+<div class="card product-card h-100 shadow-sm">
+  <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}">
+  <div class="card-body d-flex flex-column">
+    <h5 class="card-title small fw-bold">{{ product.name }}</h5>
+    <p class="card-text text-muted small mb-2">{{ product.short_desc }}</p>
+    <div class="mt-auto d-flex align-items-center justify-content-between">
+      <div class="fw-bold">{{ product.price }} €</div>
+      <div>
+        <button class="btn btn-sm btn-outline-primary" hx-post="{{ url_for('cart.add', product_id=product.id) }}" hx-swap="none" hx-trigger="click" hx-on="htmx:afterRequest: showAddedToast()">Ajouter</button>
+        <a class="btn btn-sm btn-primary" href="{{ url_for('catalog.product', product_id=product.id) }}">Voir</a>
+      </div>
+    </div>
+  </div>
+</div>

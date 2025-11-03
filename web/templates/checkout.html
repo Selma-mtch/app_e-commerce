@@ -5,6 +5,7 @@
   <div class="row">
     <div class="col-md-7">
       <form method="post" action="{{ url_for('order.place') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <!-- adresse, contact -->
         <div class="mb-3">
           <label class="form-label">Adresse de livraison</label>

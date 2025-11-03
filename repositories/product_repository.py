@@ -1,5 +1,4 @@
-from ast import Dict, List
-from typing import Optional
+from typing import Dict, List, Optional
 
 from models.product import Product
 

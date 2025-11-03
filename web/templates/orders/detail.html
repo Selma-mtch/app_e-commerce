@@ -53,6 +53,14 @@
         </tfoot>
     </table>
 
-    <a href="{{ url_for('orders.list_orders') }}" class="btn btn-secondary">Retour à mes commandes</a>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('orders.list_orders') }}" class="btn btn-secondary">Retour à mes commandes</a>
+      {% if order.status.name not in ['EXPEDIEE','LIVREE','ANNULEE','REMBOURSEE'] %}
+      <form method="post" action="{{ url_for('orders.cancel', order_id=order.id) }}" onsubmit="return confirm('Confirmer l\'annulation de la commande ?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-outline-danger">Annuler la commande</button>
+      </form>
+      {% endif %}
+    </div>
 </div>
 {% endblock %}

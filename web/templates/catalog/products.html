@@ -17,6 +17,7 @@
             <div class="mt-auto">
               <p class="fw-bold mb-2">{{ "%.2f"|format(product.price_cents / 100) }} €</p>
               <form method="post" action="{{ url_for('cart.add', product_id=product.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-primary w-100">
                   <i class="bi bi-cart-plus"></i> Ajouter au panier
                 </button>

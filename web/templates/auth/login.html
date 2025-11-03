@@ -8,6 +8,7 @@
       <h3 class="h5 mb-3 text-center fw-semibold">Se connecter</h3>
 
       <form method="post" action="{{ url_for('auth.login') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="mb-3">
           <label for="email" class="form-label">Adresse e-mail</label>
           <input id="email" name="email" type="email" class="form-control" placeholder="exemple@mail.com" required>

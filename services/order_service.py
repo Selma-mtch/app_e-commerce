@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ast import List
+from typing import List
 import time
 from typing import Optional
 import uuid
@@ -70,7 +70,7 @@ class OrderService:
         if not cart.items:
             raise ValueError("Panier vide.")
         
-        # Réserver le stock
+        # Validation préalable des articles (aucune mutation)
         order_items: List[OrderItem] = []
         for it in cart.items.values():
             p = self.products.get(it.product_id)
@@ -78,27 +78,37 @@ class OrderService:
                 raise ValueError("Produit indisponible.")
             if p.stock_qty < it.quantity:
                 raise ValueError(f"Stock insuffisant pour {p.name}.")
-            
-            self.products.reserve_stock(p.id, it.quantity)
             order_items.append(OrderItem(
                 product_id=p.id,
                 name=p.name,
                 unit_price_cents=p.price_cents,
                 quantity=it.quantity
             ))
-        
-        order = Order(
-            id=str(uuid.uuid4()),
-            user_id=user_id,
-            items=order_items,
-            status=OrderStatus.CREE,
-            created_at=time.time()
-        )
-        self.orders.add(order)
-        
-        # Vider le panier
-        self.carts.clear(user_id)
-        return order
+
+        # Réservation atomique du stock avec rollback en cas d'erreur
+        reserved: list[tuple[str, int]] = []
+        try:
+            for it in cart.items.values():
+                self.products.reserve_stock(it.product_id, it.quantity)
+                reserved.append((it.product_id, it.quantity))
+
+            order = Order(
+                id=str(uuid.uuid4()),
+                user_id=user_id,
+                items=order_items,
+                status=OrderStatus.CREE,
+                created_at=time.time()
+            )
+            self.orders.add(order)
+
+            # Vider le panier
+            self.carts.clear(user_id)
+            return order
+        except Exception:
+            # rollback des réservations faites
+            for pid, qty in reserved:
+                self.products.release_stock(pid, qty)
+            raise
 
     def pay_by_card(self, order_id: str, card_number: str, exp_month: int, 
                     exp_year: int, cvc: str) -> Payment:

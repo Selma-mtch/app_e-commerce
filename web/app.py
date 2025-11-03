@@ -1,7 +1,10 @@
 """Application Flask principale."""
 
-from flask import Flask, render_template, session, current_app
-from flask_login import LoginManager
+import logging
+import os
+from flask import Flask, render_template, session, current_app, request
+from flask_login import LoginManager, current_user
+from flask_wtf.csrf import CSRFProtect, generate_csrf
 from config import config
 from datetime import datetime
 
@@ -15,6 +18,14 @@ from repositories.order_repository import OrderRepository
 from repositories.invoice_repository import InvoiceRepository
 from repositories.payment_repository import PaymentRepository
 from repositories.thread_repository import ThreadRepository
+from repositories.db_product_repository import ProductRepositoryDB
+from repositories.db_user_repository import UserRepositoryDB
+from repositories.db_order_repository import OrderRepositoryDB
+from repositories.db_payment_repository import PaymentRepositoryDB
+from repositories.db_invoice_repository import InvoiceRepositoryDB
+from repositories.db_thread_repository import ThreadRepositoryDB
+from repositories.db_cart_repository import CartRepositoryDB
+from db.core import build_engine_from_env, Base
 
 from services.auth.session_manager import SessionManager
 from services.auth.auth_service import AuthService
@@ -33,13 +44,23 @@ login_manager.login_view = "auth.login" # redirige vers la page de login si pas 
 def init_services(app):
     """Initialise les services et les attache à l'application."""
     # Repositories
-    app.users_repo = UserRepository()
-    app.products_repo = ProductRepository()
-    app.carts_repo = CartRepository()
-    app.orders_repo = OrderRepository()
-    app.invoices_repo = InvoiceRepository()
-    app.payments_repo = PaymentRepository()
-    app.threads_repo = ThreadRepository()
+    if getattr(app, 'db_sessionmaker', None):
+        sf = app.db_sessionmaker
+        app.users_repo = UserRepositoryDB(sf)
+        app.products_repo = ProductRepositoryDB(sf)
+        app.carts_repo = CartRepositoryDB(sf)
+        app.orders_repo = OrderRepositoryDB(sf)
+        app.invoices_repo = InvoiceRepositoryDB(sf)
+        app.payments_repo = PaymentRepositoryDB(sf)
+        app.threads_repo = ThreadRepositoryDB(sf)
+    else:
+        app.users_repo = UserRepository()
+        app.products_repo = ProductRepository()
+        app.carts_repo = CartRepository()
+        app.orders_repo = OrderRepository()
+        app.invoices_repo = InvoiceRepository()
+        app.payments_repo = PaymentRepository()
+        app.threads_repo = ThreadRepository()
     
     # Services
     app.sessions = SessionManager()
@@ -134,14 +155,39 @@ def create_app(config_name='default'):
     Returns:
         Application Flask configurée
     """
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='templates/static', static_url_path='/static')
     app.config.from_object(config[config_name])
     
+    # Logging de base
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
+
+    # Sécurité: clé secrète obligatoire en production
+    if not app.config.get('DEBUG') and (not app.config.get('SECRET_KEY') or app.config['SECRET_KEY'] == 'dev-secret-key-change-in-production'):
+        raise RuntimeError('SECRET_KEY must be set in production')
+    
+    # Protection CSRF
+    csrf = CSRFProtect()
+    csrf.init_app(app)
+
+    # Base de données (si DATABASE_URL défini)
+    db_pair = build_engine_from_env()
+    if db_pair:
+        engine, SessionLocal = db_pair
+        app.db_engine = engine
+        app.db_sessionmaker = SessionLocal
+        if app.config.get('DB_AUTO_CREATE', False):
+            Base.metadata.create_all(engine)
+        logging.info("Database initialised.")
+    else:
+        app.db_engine = None
+        app.db_sessionmaker = None
+
     # Initialiser les services
     init_services(app)
     
-    # Charger les données de démo
-    init_sample_data(app)
+    # Charger les données de démo (désactivable par config)
+    if app.config.get('LOAD_SAMPLE_DATA', True):
+        init_sample_data(app)
 
     #Initialisation Flask-Login
     login_manager.init_app(app)
@@ -189,4 +235,37 @@ def create_app(config_name='default'):
             cart = current_app.cart_service.view_cart(session['user_id'])
             cart_count = sum(item.quantity for item in cart.items.values())
         return {'cart_count': cart_count}
+
+    @app.context_processor
+    def inject_csrf_token():
+        return {'csrf_token': lambda: generate_csrf()}
+
+    @app.after_request
+    def add_no_cache_headers(response):
+        """Empêche la mise en cache des pages vues en étant connecté.
+
+        Évite que le bouton "Retour" affiche une page authentifiée après déconnexion.
+        Conserve le cache pour les assets statiques.
+        """
+        if request.endpoint == 'static':
+            return response
+        if current_user.is_authenticated or 'user_id' in session:
+            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+            response.headers['Vary'] = 'Cookie'
+        return response
+
+    # Gestion d'erreurs simples
+    @app.errorhandler(404)
+    def not_found(e):
+        return render_template('index.html'), 404
+
+    @app.errorhandler(400)
+    def bad_request(e):
+        return render_template('index.html'), 400
+
+    @app.errorhandler(500)
+    def server_error(e):
+        return render_template('index.html'), 500
     return app

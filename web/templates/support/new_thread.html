@@ -5,7 +5,8 @@
 <div class="container mt-5">
   <h2 class="mb-4">📩 Créer un nouveau ticket</h2>
 
-  <form method="POST" class="row g-3">
+  <form method="POST" class="row g-3" action="{{ url_for('support.new_thread') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="col-md-6">
       <label for="subject" class="form-label">Sujet</label>
       <input type="text" class="form-control" id="subject" name="subject" required>

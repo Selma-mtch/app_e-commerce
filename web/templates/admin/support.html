@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Admin — Support{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Tickets Support</h2>
+  {% if threads %}
+  <table class="table table-striped align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>Sujet</th>
+        <th>Utilisateur</th>
+        <th>Commande</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in threads %}
+      <tr>
+        <td>{{ t.subject }}</td>
+        <td>{{ t.user_id }}</td>
+        <td>{{ t.order_id or '-' }}</td>
+        <td>{% if t.closed %}<span class="badge bg-secondary">Fermé</span>{% else %}<span class="badge bg-success">Ouvert</span>{% endif %}</td>
+        <td class="d-flex gap-2">
+          <a href="{{ url_for('admin.support_thread', thread_id=t.id) }}" class="btn btn-sm btn-outline-primary">Voir</a>
+          {% if not t.closed %}
+          <form method="post" action="{{ url_for('admin.close_thread', thread_id=t.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-outline-danger">Fermer</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <div class="alert alert-info">Aucun ticket.</div>
+  {% endif %}
+</div>
+{% endblock %}

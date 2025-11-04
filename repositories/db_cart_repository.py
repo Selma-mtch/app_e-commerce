@@ -16,13 +16,14 @@ class CartRepositoryDB:
             return Cart(user_id=user_id, items=items)
 
     def clear(self, user_id: str):
-        with self._session_factory().begin() as s:
+        # Utiliser sessionmaker.begin() pour obtenir une Session avec transaction
+        with self._session_factory.begin() as s:
             s.execute(delete(CartItemDB).where(CartItemDB.user_id == user_id))
 
     def add_item(self, user_id: str, product_id: str, qty: int = 1):
         if qty <= 0:
             return
-        with self._session_factory().begin() as s:
+        with self._session_factory.begin() as s:
             # À la manière d'un UPSERT : tenter une mise à jour, sinon insérer
             res = s.execute(
                 update(CartItemDB)
@@ -33,7 +34,7 @@ class CartRepositoryDB:
                 s.add(CartItemDB(user_id=user_id, product_id=product_id, quantity=qty))
 
     def remove_item(self, user_id: str, product_id: str, qty: int = 1):
-        with self._session_factory().begin() as s:
+        with self._session_factory.begin() as s:
             if qty <= 0:
                 s.execute(delete(CartItemDB).where(CartItemDB.user_id == user_id, CartItemDB.product_id == product_id))
                 return
@@ -47,6 +48,6 @@ class CartRepositoryDB:
             s.execute(delete(CartItemDB).where(CartItemDB.user_id == user_id, CartItemDB.product_id == product_id, CartItemDB.quantity <= 0))
 
     def remove_product_everywhere(self, product_id: str) -> int:
-        with self._session_factory().begin() as s:
+        with self._session_factory.begin() as s:
             res = s.execute(delete(CartItemDB).where(CartItemDB.product_id == product_id))
             return res.rowcount or 0

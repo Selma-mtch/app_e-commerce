@@ -41,9 +41,31 @@ def view():
 @login_required
 def add(product_id):
     """Ajouter au panier."""
-    qty = int(request.form.get('quantity', 1))
-    current_app.cart_service.add_to_cart(session['user_id'], product_id, qty)
-    flash('Produit ajouté au panier !', 'success')
+    try:
+        qty_raw = request.form.get('quantity', 1)
+        try:
+            qty = int(qty_raw)
+        except (TypeError, ValueError):
+            qty = 1
+
+        current_app.cart_service.add_to_cart(session['user_id'], product_id, qty)
+        flash('Produit ajouté au panier !', 'success')
+    except ValueError as e:
+        # Cas courant: produit introuvable (page obsolète / ID périmé)
+        flash(str(e) or 'Produit introuvable ou indisponible. Rafraîchissez la page.', 'warning')
+        if request.headers.get('HX-Request'):
+            # Retourner le compteur tel quel sans erreur 500
+            cart = current_app.cart_service.view_cart(session['user_id'])
+            cart_count = sum(item.quantity for item in cart.items.values())
+            return f'<span id="cart-count" class="badge bg-primary">{cart_count}</span>'
+        return redirect(url_for('catalog.products'))
+    except Exception:
+        flash("Impossible d'ajouter au panier. Veuillez réessayer.", 'danger')
+        if request.headers.get('HX-Request'):
+            cart = current_app.cart_service.view_cart(session['user_id'])
+            cart_count = sum(item.quantity for item in cart.items.values())
+            return f'<span id="cart-count" class="badge bg-primary">{cart_count}</span>'
+        return redirect(url_for('catalog.products'))
     # try:
     #     current_app.cart_service.add_to_cart(session['user_id'], product_id, qty)
         
@@ -58,9 +80,7 @@ def add(product_id):
 
     # Compter les articles depuis le vrai panier
     cart = current_app.cart_service.view_cart(session['user_id'])
-
     cart_count = sum(item.quantity for item in cart.items.values())
-
     if request.headers.get('HX-Request'):
         return f'<span id="cart-count" class="badge bg-primary">{cart_count}</span>'
     

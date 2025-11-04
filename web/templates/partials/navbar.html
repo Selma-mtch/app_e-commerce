@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
   <div class="container">
-    <a class="navbar-brand fw-bold" href="{{ url_for('catalog.products') }}">MaBoutique</a>
+    <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">MaBoutique</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -12,7 +12,7 @@
       </ul>
 
       <form class="d-flex me-3" action="{{ url_for('catalog.products') }}" method="get">
-        <input class="form-control form-control-sm me-2" type="search" name="q" placeholder="Rechercher produit...">
+        <input class="form-control form-control-sm me-2" type="search" name="q" placeholder="Rechercher produit..." value="{{ request.args.get('q', '') }}">
       </form>
 
       <ul class="navbar-nav mb-2 mb-lg-0">

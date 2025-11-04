@@ -59,10 +59,12 @@ body {
 .btn-primary {
   background-color: var(--accent);
   border-color: var(--accent);
+  color: #fff;
   font-weight: 500;
 }
 .btn-primary:hover {
   background-color: #0b5ed7;
+  color: #fff;
 }
 .btn-outline-primary {
   border-color: var(--accent);
@@ -99,11 +101,17 @@ body {
 .card hr {
   opacity: 0.1;
 }
-.text-center a {
+.text-center a:not(.btn) {
   color: var(--accent);
 }
-.text-center a:hover {
+.text-center a:not(.btn):hover {
   text-decoration: underline;
+}
+
+/* Garantir la lisibilité du texte des boutons liens */
+.btn-primary,
+.btn-primary:visited {
+  color: #fff;
 }
 
 /* --- Panier --- */
@@ -119,7 +127,19 @@ body {
   background-color: #fff;
   border-radius: 0.5rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  animation: fadeInOut 2s ease forwards;
+}
+/* Empêcher le conteneur de toasts de bloquer les clics sur la navbar */
+.toast-container {
+  pointer-events: none;
+  z-index: 1060; /* au-dessus du contenu, sous modals */
+}
+/* Conserver l'interaction sur les toasts eux‑mêmes (bouton close, etc.) */
+.toast {
+  pointer-events: auto;
+}
+/* Ne pas intercepter les clics quand la toast est masquée */
+.toast.hide, .toast:not(.show) {
+  pointer-events: none;
 }
 @keyframes fadeInOut {
   0% { opacity: 0; transform: translateY(-10px); }

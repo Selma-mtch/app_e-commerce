@@ -19,13 +19,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     {% block head %}{% endblock %}
   </head>
-  <body class="bg-light">
+  <body class="bg-light d-flex flex-column min-vh-100">
     {% include 'partials/navbar.html' %}
 
-    <main class="container my-4">
+    <main class="container my-4 flex-grow-1">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-          <div  id="flash-messages" class="toast-container position-fixed top-0 end-0 p-3">
+          <div  id="flash-messages" class="toast-container position-fixed bottom-0 end-0 p-3">
             {% for category, message in messages %}
               <div class="toast align-items-center text-bg-{{ category }} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000" data-bs-autohide="true">
                 <div class="d-flex">

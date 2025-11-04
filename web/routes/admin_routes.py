@@ -2,6 +2,8 @@
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from web.utils.decorators import admin_required
+from models.product import Product
+import uuid
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -93,6 +95,49 @@ def products():
     """Catalogue produits (admin)."""
     products = list(getattr(current_app.products_repo, '_by_id', {}).values())
     return render_template('admin/products.html', products=products)
+
+
+@admin_bp.route('/products/new', methods=['GET', 'POST'])
+@admin_required
+def new_product():
+    """Formulaire de création d'un produit."""
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        description = request.form.get('description', '').strip()
+        price_eur = request.form.get('price_eur', '').strip()
+        stock_qty = request.form.get('stock_qty', '').strip()
+        active = True if request.form.get('active') == 'on' else False
+
+        # Validations simples
+        if not name or not description or not price_eur or not stock_qty:
+            flash('Tous les champs obligatoires doivent être remplis.', 'danger')
+            return render_template('admin/product_form.html', mode='new')
+        try:
+            price_cents = int(round(float(price_eur.replace(',', '.')) * 100))
+            qty = int(stock_qty)
+            if price_cents < 0 or qty < 0:
+                raise ValueError
+        except Exception:
+            flash("Prix ou stock invalide.", 'danger')
+            return render_template('admin/product_form.html', mode='new')
+
+        p = Product(
+            id=str(uuid.uuid4()),
+            name=name,
+            description=description,
+            price_cents=price_cents,
+            stock_qty=qty,
+            active=active,
+        )
+        try:
+            current_app.products_repo.add(p)
+            flash('Produit créé avec succès.', 'success')
+            return redirect(url_for('admin.products'))
+        except Exception as e:
+            flash(f"Erreur lors de la création: {e}", 'danger')
+            return render_template('admin/product_form.html', mode='new')
+
+    return render_template('admin/product_form.html', mode='new')
 
 
 @admin_bp.route('/products/<product_id>/toggle', methods=['POST'])

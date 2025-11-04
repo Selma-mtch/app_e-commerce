@@ -11,7 +11,7 @@ class ThreadRepositoryDB:
         self._session_factory = session_factory
 
     def add(self, thread: MessageThread):
-        with self._session_factory().begin() as s:
+        with self._session_factory.begin() as s:
             s.add(ThreadDB(
                 id=thread.id,
                 user_id=thread.user_id,
@@ -41,7 +41,7 @@ class ThreadRepositoryDB:
             return [MessageThread(id=t.id, user_id=t.user_id, order_id=t.order_id, subject=t.subject, messages=[], closed=t.closed) for t in rows]
 
     def add_message(self, thread_id: str, message: Message):
-        with self._session_factory().begin() as s:
+        with self._session_factory.begin() as s:
             s.add(MessageDB(
                 id=message.id,
                 thread_id=thread_id,
@@ -51,8 +51,7 @@ class ThreadRepositoryDB:
             ))
 
     def close(self, thread_id: str):
-        with self._session_factory().begin() as s:
+        with self._session_factory.begin() as s:
             t = s.get(ThreadDB, thread_id)
             if t:
                 t.closed = True
-

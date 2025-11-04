@@ -13,7 +13,7 @@ class OrderRepositoryDB:
         self._session_factory = session_factory
 
     def add(self, order: Order):
-        with self._session_factory().begin() as s:
+        with self._session_factory.begin() as s:
             s.add(OrderDB(
                 id=order.id,
                 user_id=order.user_id,
@@ -88,7 +88,7 @@ class OrderRepositoryDB:
             return result
 
     def update(self, order: Order):
-        with self._session_factory().begin() as s:
+        with self._session_factory.begin() as s:
             s.execute(
                 update(OrderDB)
                 .where(OrderDB.id == order.id)

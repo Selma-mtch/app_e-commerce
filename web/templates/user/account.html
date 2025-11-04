@@ -26,8 +26,50 @@
             <h6 class="text-secondary">Adresse :</h6>
             <form method="post" class="d-flex align-items-center" action="{{ url_for('auth.profile') }}">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="action" value="update_profile">
               <input type="text" class="form-control me-2" name="address" value="{{ current_user.address or '' }}" placeholder="Votre adresse">
               <button type="submit" class="btn btn-primary">Mettre à jour</button>
+            </form>
+          </div>
+
+          <hr>
+
+          <div class="mb-3">
+            <h6 class="text-secondary">Changer d'adresse email :</h6>
+            <form method="post" action="{{ url_for('auth.profile') }}" class="row g-2">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="action" value="change_email">
+              <div class="col-md-6">
+                <input type="email" class="form-control" name="new_email" placeholder="Nouvel email" required>
+              </div>
+              <div class="col-md-6">
+                <input type="password" class="form-control" name="current_password" placeholder="Mot de passe actuel" required>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary">Mettre à jour l'email</button>
+              </div>
+            </form>
+          </div>
+
+          <hr>
+
+          <div class="mb-3">
+            <h6 class="text-secondary">Changer de mot de passe :</h6>
+            <form method="post" action="{{ url_for('auth.profile') }}" class="row g-2">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="action" value="change_password">
+              <div class="col-md-4">
+                <input type="password" class="form-control" name="current_password" placeholder="Mot de passe actuel" required>
+              </div>
+              <div class="col-md-4">
+                <input type="password" class="form-control" name="new_password" placeholder="Nouveau mot de passe (min 8)" minlength="8" required>
+              </div>
+              <div class="col-md-4">
+                <input type="password" class="form-control" name="confirm_password" placeholder="Confirmer le nouveau" minlength="8" required>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary">Mettre à jour le mot de passe</button>
+              </div>
             </form>
           </div>
 

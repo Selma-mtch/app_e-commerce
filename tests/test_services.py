@@ -213,3 +213,38 @@ def test_checkout_rollback_on_reservation_failure():
     assert products.get(p1.id).stock_qty == 5
     assert products.get(p2.id).stock_qty == 5
     assert orders.list_by_user(user.id) == []
+
+
+def test_auth_change_email_and_password_local():
+    """Vérifie les changements d'email et de mot de passe côté service (repo mémoire)."""
+    users = UserRepository()
+    sessions = SessionManager()
+    auth = AuthService(users, sessions)
+
+    # Inscription
+    u = auth.register(
+        email="change_me@example.com",
+        password="password123",
+        first_name="Jean",
+        last_name="Dupont",
+        address="123 Rue Test",
+    )
+
+    # Changer l'email (mot de passe actuel requis)
+    updated = auth.change_email(u.id, current_password="password123", new_email="new_email@example.com")
+    assert updated.email == "new_email@example.com"
+
+    # Login avec nouvel email fonctionne
+    token = auth.login("new_email@example.com", "password123")
+    assert sessions.get_user_id(token) == u.id
+
+    # Changer le mot de passe
+    auth.change_password(u.id, current_password="password123", new_password="newpass456")
+
+    # Ancien mot de passe invalide
+    with pytest.raises(ValueError):
+        auth.login("new_email@example.com", "password123")
+
+    # Nouveau mot de passe OK
+    token2 = auth.login("new_email@example.com", "newpass456")
+    assert sessions.get_user_id(token2) == u.id

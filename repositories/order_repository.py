@@ -28,3 +28,7 @@ class OrderRepository:
     def update(self, order: Order):
         """Met à jour une commande existante."""
         self._by_id[order.id] = order
+
+    def list_all(self) -> list[Order]:
+        """Liste toutes les commandes (tous utilisateurs)."""
+        return list(self._by_id.values())

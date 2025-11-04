@@ -87,6 +87,32 @@ class OrderRepositoryDB:
                 ))
             return result
 
+    def list_all(self) -> list[Order]:
+        """Liste toutes les commandes tous utilisateurs."""
+        with self._session_factory() as s:
+            rows = s.scalars(select(OrderDB)).all()
+            result: List[Order] = []
+            for r in rows:
+                items = s.scalars(select(OrderItemDB).where(OrderItemDB.order_id == r.id)).all()
+                delivery = s.scalars(select(DeliveryDB).where(DeliveryDB.order_id == r.id)).first()
+                result.append(Order(
+                    id=r.id,
+                    user_id=r.user_id,
+                    items=[OrderItem(product_id=i.product_id, name=i.name, unit_price_cents=i.unit_price_cents, quantity=i.quantity) for i in items],
+                    status=OrderStatus[r.status],
+                    created_at=r.created_at,
+                    validated_at=r.validated_at,
+                    paid_at=r.paid_at,
+                    shipped_at=r.shipped_at,
+                    delivered_at=r.delivered_at,
+                    cancelled_at=r.cancelled_at,
+                    refunded_at=r.refunded_at,
+                    delivery=Delivery(id=delivery.id, order_id=delivery.order_id, carrier=delivery.carrier, tracking_number=delivery.tracking_number, address=delivery.address, status=delivery.status) if delivery else None,
+                    invoice_id=r.invoice_id,
+                    payment_id=r.payment_id,
+                ))
+            return result
+
     def update(self, order: Order):
         with self._session_factory.begin() as s:
             s.execute(

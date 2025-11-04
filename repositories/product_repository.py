@@ -23,6 +23,10 @@ class ProductRepository:
         """Liste tous les produits actifs."""
         return [p for p in self._by_id.values() if p.active]
 
+    def list_all(self) -> list[Product]:
+        """Liste tous les produits (actifs et inactifs)."""
+        return list(self._by_id.values())
+
     def reserve_stock(self, product_id: str, qty: int):
         """
         Réserve une quantité de stock pour un produit.

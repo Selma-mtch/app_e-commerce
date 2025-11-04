@@ -12,12 +12,12 @@ admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 @admin_required
 def dashboard():
     """Tableau de bord admin avec indicateurs clés."""
-    users_count = len(getattr(current_app.users_repo, '_by_id', {}))
-    products_count = len(getattr(current_app.products_repo, '_by_id', {}))
-    orders_count = len(getattr(current_app.orders_repo, '_by_id', {}))
-    invoices_count = len(getattr(current_app.invoices_repo, '_by_id', {}))
-    payments_count = len(getattr(current_app.payments_repo, '_by_id', {}))
-    threads_count = len(getattr(current_app.threads_repo, '_by_id', {}))
+    users_count = len(current_app.users_repo.list_all()) if hasattr(current_app.users_repo, 'list_all') else len(getattr(current_app.users_repo, '_by_id', {}))
+    products_count = len(current_app.products_repo.list_all()) if hasattr(current_app.products_repo, 'list_all') else len(getattr(current_app.products_repo, '_by_id', {}))
+    orders_count = len(current_app.orders_repo.list_all()) if hasattr(current_app.orders_repo, 'list_all') else len(getattr(current_app.orders_repo, '_by_id', {}))
+    invoices_count = len(current_app.invoices_repo.list_all()) if hasattr(current_app.invoices_repo, 'list_all') else len(getattr(current_app.invoices_repo, '_by_id', {}))
+    payments_count = len(current_app.payments_repo.list_all()) if hasattr(current_app.payments_repo, 'list_all') else len(getattr(current_app.payments_repo, '_by_id', {}))
+    threads_count = len(current_app.threads_repo.list_all()) if hasattr(current_app.threads_repo, 'list_all') else len(getattr(current_app.threads_repo, '_by_id', {}))
     return render_template(
         'admin/dashboard.html',
         users_count=users_count,
@@ -33,9 +33,12 @@ def dashboard():
 @admin_required
 def orders():
     """Liste de toutes les commandes et actions possibles."""
-    all_orders = []
-    for user_id in getattr(current_app.orders_repo, '_by_user', {}).keys():
-        all_orders.extend(current_app.orders_repo.list_by_user(user_id))
+    if hasattr(current_app.orders_repo, 'list_all'):
+        all_orders = current_app.orders_repo.list_all()
+    else:
+        all_orders = []
+        for user_id in getattr(current_app.orders_repo, '_by_user', {}).keys():
+            all_orders.extend(current_app.orders_repo.list_by_user(user_id))
     return render_template('admin/orders.html', orders=all_orders)
 
 
@@ -93,7 +96,10 @@ def refund_order(order_id):
 @admin_required
 def products():
     """Catalogue produits (admin)."""
-    products = list(getattr(current_app.products_repo, '_by_id', {}).values())
+    if hasattr(current_app.products_repo, 'list_all'):
+        products = current_app.products_repo.list_all()
+    else:
+        products = list(getattr(current_app.products_repo, '_by_id', {}).values())
     return render_template('admin/products.html', products=products)
 
 
@@ -167,7 +173,10 @@ def toggle_product(product_id):
 @admin_required
 def support():
     """Liste des tickets support (admin)."""
-    threads = list(getattr(current_app.threads_repo, '_by_id', {}).values())
+    if hasattr(current_app.threads_repo, 'list_all'):
+        threads = current_app.threads_repo.list_all()
+    else:
+        threads = list(getattr(current_app.threads_repo, '_by_id', {}).values())
     return render_template('admin/support.html', threads=threads)
 
 

@@ -78,3 +78,19 @@ class UserRepositoryDB:
                 return
             row.password_hash = new_hash
             s.commit()
+
+    def list_all(self) -> list[User]:
+        with self._session_factory() as s:
+            rows = s.scalars(select(UserDB)).all()
+            return [
+                User(
+                    id=r.id,
+                    email=r.email,
+                    password_hash=r.password_hash,
+                    first_name=r.first_name,
+                    last_name=r.last_name,
+                    address=r.address,
+                    is_admin=r.is_admin,
+                )
+                for r in rows
+            ]

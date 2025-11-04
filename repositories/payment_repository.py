@@ -18,3 +18,7 @@ class PaymentRepository:
     def get(self, payment_id: str) -> Optional[Payment]:
         """Récupère un paiement par son ID."""
         return self._by_id.get(payment_id)
+
+    def list_all(self) -> list[Payment]:
+        """Liste tous les paiements."""
+        return list(self._by_id.values())

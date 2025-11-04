@@ -65,6 +65,22 @@ class ProductRepositoryDB:
                 for r in rows
             ]
 
+    def list_all(self) -> list[Product]:
+        """Liste tous les produits, actifs et inactifs."""
+        with self._session_factory() as s:
+            rows = s.scalars(select(ProductDB)).all()
+            return [
+                Product(
+                    id=r.id,
+                    name=r.name,
+                    description=r.description,
+                    price_cents=r.price_cents,
+                    stock_qty=r.stock_qty,
+                    active=r.active,
+                )
+                for r in rows
+            ]
+
     def reserve_stock(self, product_id: str, qty: int):
         with self._session_factory.begin() as s:
             res = s.execute(

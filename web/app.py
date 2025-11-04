@@ -88,7 +88,18 @@ def init_sample_data(app):
     """Charge des données de démonstration."""
     from models.product import Product
     import uuid
-    
+    # Si des produits existent déjà, ne rien semer (évite les doublons en prod)
+    try:
+        existing_count = 0
+        if hasattr(app.products_repo, 'list_all'):
+            existing_count = len(app.products_repo.list_all())
+        else:
+            existing_count = len(getattr(app.products_repo, '_by_id', {}))
+        if existing_count > 0:
+            return
+    except Exception:
+        pass
+
     # Produits de démo
     products = [
         Product(

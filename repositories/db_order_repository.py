@@ -9,10 +9,12 @@ from models.db_models import OrderDB, OrderItemDB, DeliveryDB
 
 
 class OrderRepositoryDB:
+    """Dépôt des commandes basé sur SQLAlchemy (CRUD + listing + livraisons)."""
     def __init__(self, session_factory: sessionmaker):
         self._session_factory = session_factory
 
     def add(self, order: Order):
+        """Ajoute une commande et ses lignes dans une transaction."""
         with self._session_factory.begin() as s:
             s.add(OrderDB(
                 id=order.id,
@@ -39,6 +41,7 @@ class OrderRepositoryDB:
                 ))
 
     def get(self, order_id: str) -> Optional[Order]:
+        """Récupère une commande complète (lignes + livraison)."""
         with self._session_factory() as s:
             r = s.get(OrderDB, order_id)
             if not r:
@@ -63,6 +66,7 @@ class OrderRepositoryDB:
             )
 
     def list_by_user(self, user_id: str) -> list[Order]:
+        """Liste les commandes d'un utilisateur donné."""
         with self._session_factory() as s:
             rows = s.scalars(select(OrderDB).where(OrderDB.user_id == user_id)).all()
             result: List[Order] = []
@@ -114,6 +118,7 @@ class OrderRepositoryDB:
             return result
 
     def update(self, order: Order):
+        """Met à jour la commande (statut, timestamps, livraison)."""
         with self._session_factory.begin() as s:
             s.execute(
                 update(OrderDB)
@@ -148,3 +153,4 @@ class OrderRepositoryDB:
                         address=d.address,
                         status=d.status,
                     ))
+"""Dépôt SQLAlchemy des commandes (CRUD, lignes, livraisons)."""

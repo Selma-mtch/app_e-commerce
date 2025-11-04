@@ -1,243 +1,153 @@
-# 🛒 Projet E-commerce
+# 🛒 Projet E‑commerce (Web + Services)
 
-Application de gestion de boutique en ligne développée en Python avec une architecture en couches.
+Application e‑commerce en Python/Flask avec architecture en couches, dépôts mémoire ou SQLAlchemy, authentification sécurisée (bcrypt), CSRF activé et interface web Bootstrap.
 
-## 📋 Table des matières
+## Sommaire
 
-- [Fonctionnalités](#fonctionnalités)
-- [Architecture](#architecture)
-- [Installation](#installation)
-- [Utilisation](#utilisation)
-- [Structure du projet](#structure-du-projet)
-- [Tests](#tests)
-- [Documentation](#documentation)
-- [Contribution](#contribution)
+- Fonctionnalités
+- Démarrage rapide (dev/local)
+- Configuration (env vars)
+- Base de données
+- Déploiement (Render)
+- Tests & CI
+- Sécurité
+- Structure
 
-## ✨ Fonctionnalités
+## Fonctionnalités
 
-### Pour les clients
-- ✅ Inscription et authentification
-- ✅ Navigation dans le catalogue de produits
-- ✅ Gestion du panier d'achat
-- ✅ Passage de commande avec validation de stock
-- ✅ Paiement par carte bancaire
-- ✅ Suivi des commandes
-- ✅ Demande d'annulation
-- ✅ Service client avec système de tickets
+Client
+- Inscription / Connexion (bcrypt)
+- Catalogue produits (recherche)
+- Panier (boutons HTMX qui mettent à jour le compteur)
+- Checkout + réservation de stock + paiement simulé
+- Suivi et annulation des commandes
+- Support (tickets/messages)
 
-### Pour les administrateurs
-- ✅ Validation des commandes
-- ✅ Gestion des expéditions
-- ✅ Marquage des livraisons
-- ✅ Remboursements
-- ✅ Gestion du service client
+Admin
+- Catalogue administrable (activer/désactiver)
+- Retrait d’un produit inactif des paniers
+- Commandes: valider, expédier, livrer, rembourser (règles d’état)
+- Support: lister/voir/clore tickets
 
-## 🏗️ Architecture
+Compte utilisateur
+- Modifier adresse, email (avec mot de passe), mot de passe (min 8)
 
-Le projet suit une **architecture en couches** pour une meilleure maintenabilité :
+## Démarrage rapide (dev/local)
 
-```
-┌─────────────────────────────────┐
-│     Services (Logique métier)   │
-├─────────────────────────────────┤
-│   Repositories (Accès données)  │
-├─────────────────────────────────┤
-│      Models (Structures données)│
-└─────────────────────────────────┘
-```
+Prérequis: Python 3.10+
 
-### Principes appliqués
-- **Separation of Concerns** : Chaque couche a une responsabilité unique
-- **Dependency Injection** : Les services reçoivent leurs dépendances
-- **Single Responsibility** : Une classe = une responsabilité
-- **Type Hints** : Typage statique pour plus de robustesse
-
-## 📦 Installation
-
-### Prérequis
-- Python 3.10 ou supérieur
-
-### Installation basique
 ```bash
-# Cloner le repository
-git clone https://github.com/votre-username/ecommerce.git
+git clone <repo>
 cd ecommerce
-
-# Créer un environnement virtuel
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# ou
-venv\Scripts\activate  # Windows
-
-# Installer les dépendances (quand elles seront ajoutées)
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+
+# Lancer l’app web (lit APP_CONFIG, PORT)
+python run_web.py
+# http://127.0.0.1:5000 par défaut
 ```
 
-## 🚀 Utilisation
+Notes dev
+- En développement, des données de démo peuvent être activées; elles sont idempotentes (pas de doublons si la base contient déjà des produits).
+- En production, le seed de démo est désactivé.
+- Image produit par défaut: `static/img/default-product.svg`.
 
-### Lancer la démonstration
-```bash
-python main.py
-```
+## Configuration (variables d’environnement)
 
-Cette commande exécute un scénario complet :
-1. Création de produits
-2. Inscription d'utilisateurs
-3. Ajout au panier
-4. Passage de commande
-5. Paiement
-6. Expédition
-7. Service client
+- `APP_CONFIG` = `development` | `production` | `testing` (défaut: development)
+- `SECRET_KEY` (obligatoire en production)
+- `DATABASE_URL` (PostgreSQL/SQLite, ex: `postgresql+psycopg://…`)
+- `PORT` (honoré par `run_web.py` et Gunicorn)
+- `DB_AUTO_CREATE` (crée les tables si besoin; activé par défaut en prod)
+- `LOAD_SAMPLE_DATA` (False en production par défaut)
 
-### Exemple d'utilisation programmatique
+## Base de données
 
-```python
-from ecommerce.models import User, Product
-from ecommerce.repositories import UserRepository, ProductRepository
-from ecommerce.services import AuthService, CatalogService
+- Si `DATABASE_URL` est défini, l’app utilise SQLAlchemy (`db/core.py`).
+- Normalisation Postgres: `postgres://` → `postgresql+psycopg://`.
+- Repositories DB: transactions via `sessionmaker.begin()` (évite les erreurs `SessionTransaction.execute`).
 
-# Initialisation
-users = UserRepository()
-products = ProductRepository()
-sessions = SessionManager()
-auth = AuthService(users, sessions)
+## Déploiement (Render)
 
-# Inscription
-user = auth.register(
-    email="client@example.com",
-    password="secure_password",
-    first_name="Jean",
-    last_name="Dupont",
-    address="123 Rue de Paris"
-)
-
-# Connexion
-token = auth.login("client@example.com", "secure_password")
-```
-
-## 📁 Structure du projet
-
-```
-ecommerce/
-├── models/              # Modèles de données
-│   ├── user.py
-│   ├── product.py
-│   ├── order.py
-│   ├── invoice.py
-│   ├── payment.py
-│   ├── delivery.py
-│   └── support.py
-│
-├── repositories/        # Couche d'accès aux données
-│   ├── user_repository.py
-│   ├── product_repository.py
-│   ├── cart_repository.py
-│   ├── order_repository.py
-│   ├── invoice_repository.py
-│   ├── payment_repository.py
-│   └── thread_repository.py
-│
-├── services/           # Logique métier
-│   ├── auth/
-│   │   ├── password_hasher.py
-│   │   ├── session_manager.py
-│   │   └── auth_service.py
-│   ├── catalog_service.py
-│   ├── cart_service.py
-│   ├── order_service.py
-│   ├── billing_service.py
-│   ├── delivery_service.py
-│   ├── payment_gateway.py
-│   └── customer_service.py
-│
-└── main.py            # Point d'entrée
-```
-
-## 🧪 Tests
+Start command recommandé (Gunicorn):
 
 ```bash
-# Lancer tous les tests
-pytest
-
-# Avec couverture de code
-pytest --cov=ecommerce --cov-report=html
-
-# Tests spécifiques
-pytest tests/test_services.py
+gunicorn 'web.app:create_app("production")' --bind 0.0.0.0:$PORT --workers ${WEB_CONCURRENCY:-2}
 ```
 
-## 📚 Documentation
+Variables conseillées:
+- `APP_CONFIG=production`
+- `SECRET_KEY=<valeur aléatoire longue>`
+- `DATABASE_URL=<URL Postgres>` (ajouter `?sslmode=require` si nécessaire)
 
-### Génération de la documentation
+Santé/port
+- L’appli se lie à `$PORT`; Render détecte et publie automatiquement le service.
+
+## Tests & CI
+
+Lancer localement:
 ```bash
-cd docs
-make html
+pytest -q
 ```
 
-La documentation sera disponible dans `docs/_build/html/index.html`
+CI GitHub Actions: `.github/workflows/python-tests.yml` exécute les tests sur chaque `push` et `pull_request` (Python 3.10).
 
-### Classes principales
+### Cas de tests réalisés
 
-#### Models
-- **User** : Représente un utilisateur
-- **Product** : Un produit du catalogue
-- **Order** : Une commande avec ses états
-- **Invoice** : Facture générée
-- **Payment** : Transaction de paiement
-- **Delivery** : Information de livraison
+- Authentification
+  - Inscription d’un utilisateur
+  - Rejet email dupliqué
+  - Connexion valide / invalide
+  - Changement d’email (succès et erreurs: mot de passe actuel invalide, email déjà pris)
+  - Changement de mot de passe (succès et erreurs: confirmation différente, mot de passe trop court)
+- Catalogue
+  - Liste des produits actifs
+  - Recherche par nom/description
+  - Accès aux produits inactifs: non‑admin redirigé, admin autorisé
+- Panier
+  - Ajout requiert d’être connecté
+  - Ajout après connexion (flux complet)
+  - Requête HTMX: retour du badge compteur sans erreur
+  - Produit inexistant: gestion côté HTMX (200 avec badge) et non‑HTMX (redirigé)
+- Commandes
+  - Checkout depuis le panier (création de commande)
+  - Paiement carte (succès)
+  - Rollback si une réservation de stock échoue
+  - Checkout interdit si panier vide (redirigé)
+- Backoffice Admin
+  - Accès interdit aux non‑admins
+  - Création de produit (formulaire)
+  - Basculer actif/inactif: retrait du produit de tous les paniers
+  - Cycle commande: valider → expédier → livrer; remboursement refusé après livraison
+  - Toggle sur produit inexistant: pas de crash
+- Support
+  - Création d’un ticket et listage
+  - Accès restreint: un utilisateur ne peut pas accéder aux tickets d’autrui
+- CSRF
+  - POST sans token (ex. add‑to‑cart): message d’avertissement + redirection (pas de 500)
+- Intégration DB (prod‑like)
+  - Changement d’email/mot de passe persistant via dépôt SQLAlchemy (tests dédiés)
 
-#### Services
-- **AuthService** : Authentification et inscription
-- **OrderService** : Gestion complète des commandes
-- **CartService** : Gestion du panier
-- **CustomerService** : Support client
+## Sécurité
 
-## 🔒 Sécurité
+- Mots de passe: `bcrypt` (voir `services/auth/password_hasher.py`).
+- CSRF: activé (Flask‑WTF) avec gestion d’erreur (message + redirection).
+- Sessions: gestion en mémoire (démo). Pour une prod réelle, utiliser Redis pour les sessions.
 
-⚠️ **Note importante** : Cette version utilise un hash simplifié pour les mots de passe.
+Réinitialiser/créer un admin (si changement de hash)
+- Mettre à jour `users.password_hash` avec un hash `bcrypt` (ou créer un nouvel utilisateur et `is_admin=true`).
 
-**En production, vous DEVEZ** :
-- Utiliser `bcrypt`, `argon2` ou `scrypt` pour les mots de passe
-- Implémenter HTTPS
-- Ajouter une protection CSRF
-- Valider toutes les entrées utilisateur
-- Utiliser une vraie base de données avec transactions
-- Implémenter un rate limiting
-- Logger les actions sensibles
+## Structure (extrait)
 
-## 🛣️ Roadmap
+```
+web/                 # Application Flask (routes, templates, statiques)
+services/            # Logique métier (auth, catalogue, commandes…)
+repositories/        # Accès données (mémoire + SQLAlchemy)
+models/              # Modèles de domaine
+tests/               # Suite PyTest
+run_web.py           # Lancement local, bind sur $PORT en conteneur
+```
 
-- [ ] API REST avec FastAPI
-- [ ] Base de données PostgreSQL
-- [ ] Frontend React
-- [ ] Intégration Stripe réelle
-- [ ] Système de notifications par email
-- [ ] Gestion des stocks en temps réel
-- [ ] Statistiques et dashboard admin
-- [ ] Système de recommandations
-- [ ] Multi-devises et multi-langues
+---
 
-## 🤝 Contribution
-
-Les contributions sont les bienvenues !
-
-1. Fork le projet
-2. Créer une branche (`git checkout -b feature/AmazingFeature`)
-3. Commit les changements (`git commit -m 'Add AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request
-
-### Guidelines
-- Suivre PEP 8
-- Ajouter des tests pour les nouvelles fonctionnalités
-- Documenter avec des docstrings
-- Utiliser le type hinting
-
-## 👥 Auteurs
-
-- Votre Nom - [@votre_twitter](https://twitter.com/votre_twitter)
-
-## 🙏 Remerciements
-
-- Architecture inspirée des principes Clean Architecture
-- Domain-Driven Design (DDD)
+Contributions bienvenues (PEP8, types, tests). Ouvrez une PR si vous souhaitez améliorer la couverture, ajouter une route `/health` ou un backend de sessions (Redis).

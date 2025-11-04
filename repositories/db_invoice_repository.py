@@ -8,10 +8,12 @@ from models.db_models import InvoiceDB, InvoiceLineDB
 
 
 class InvoiceRepositoryDB:
+    """Dépôt des factures et lignes de facture (SQLAlchemy)."""
     def __init__(self, session_factory: sessionmaker):
         self._session_factory = session_factory
 
     def add(self, invoice: Invoice):
+        """Crée une facture et ses lignes dans une transaction."""
         with self._session_factory.begin() as s:
             s.add(InvoiceDB(
                 id=invoice.id,
@@ -31,6 +33,7 @@ class InvoiceRepositoryDB:
                 ))
 
     def get(self, invoice_id: str) -> Optional[Invoice]:
+        """Récupère une facture complète par identifiant."""
         with self._session_factory() as s:
             r = s.get(InvoiceDB, invoice_id)
             if not r:
@@ -46,6 +49,7 @@ class InvoiceRepositoryDB:
             )
 
     def list_all(self) -> list[Invoice]:
+        """Liste toutes les factures avec leurs lignes."""
         with self._session_factory() as s:
             rows = s.scalars(select(InvoiceDB)).all()
             result: list[Invoice] = []
@@ -60,3 +64,4 @@ class InvoiceRepositoryDB:
                     issued_at=r.issued_at,
                 ))
             return result
+"""Dépôt SQLAlchemy des factures et de leurs lignes."""

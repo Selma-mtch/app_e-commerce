@@ -6,10 +6,11 @@ Base = declarative_base()
 
 
 def normalize_database_url(url: str) -> str:
-    """Ensure SQLAlchemy URL uses psycopg driver for Postgres.
+    """Normalise l'URL de base de données pour SQLAlchemy (Postgres psycopg).
 
-    - Accepts postgresql:// and postgres:// and converts to postgresql+psycopg://
-    - Leaves other schemes intact
+    - Accepte les schémas ``postgresql://`` et ``postgres://`` et les convertit en
+      ``postgresql+psycopg://`` pour le driver moderne.
+    - Laisse les autres schémas intacts.
     """
     if url.startswith("postgres://"):
         return url.replace("postgres://", "postgresql+psycopg://", 1)
@@ -19,9 +20,9 @@ def normalize_database_url(url: str) -> str:
 
 
 def build_engine_from_env() -> tuple | None:
-    """Build a SQLAlchemy engine + sessionmaker from env DATABASE_URL.
+    """Construit un engine SQLAlchemy + sessionmaker à partir de ``DATABASE_URL``.
 
-    Returns (engine, SessionLocal) or None if DATABASE_URL is not set.
+    Retourne ``(engine, SessionLocal)`` ou ``None`` si la variable n'est pas définie.
     """
     url = os.getenv("DATABASE_URL")
     if not url:
@@ -30,4 +31,4 @@ def build_engine_from_env() -> tuple | None:
     engine = create_engine(url, pool_pre_ping=True)
     SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
     return engine, SessionLocal
-
+"""Outils de configuration SQLAlchemy (engine/session) et normalisation d'URL DB."""

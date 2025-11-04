@@ -7,15 +7,17 @@ from models.db_models import ProductDB
 
 
 class ProductRepositoryDB:
-    """Dépôt de produits basé sur SQL implémentant la même interface.
+    """Dépôt de produits basé sur SQLAlchemy.
 
-    Méthodes : add, get, list_active, reserve_stock, release_stock
+    Fournit l'API produits (création/lecture/liste) et la gestion de stock
+    transactionnelle (réservation/libération).
     """
 
     def __init__(self, session_factory: sessionmaker):
         self._session_factory = session_factory
 
     def add(self, product: Product):
+        """Crée ou met à jour un produit (upsert simple)."""
         with self._session_factory() as s:  # type: Session
             obj = s.get(ProductDB, product.id)
             if obj:
@@ -37,6 +39,7 @@ class ProductRepositoryDB:
             s.commit()
 
     def get(self, product_id: str) -> Optional[Product]:
+        """Retourne un produit par son identifiant ou ``None`` s'il n'existe pas."""
         with self._session_factory() as s:
             row = s.get(ProductDB, product_id)
             if not row:
@@ -51,6 +54,7 @@ class ProductRepositoryDB:
             )
 
     def list_active(self) -> list[Product]:
+        """Liste uniquement les produits actifs."""
         with self._session_factory() as s:
             rows = s.scalars(select(ProductDB).where(ProductDB.active == True)).all()  # noqa: E712
             return [
@@ -82,6 +86,7 @@ class ProductRepositoryDB:
             ]
 
     def reserve_stock(self, product_id: str, qty: int):
+        """Décrémente le stock si disponible, sinon lève ``ValueError``."""
         with self._session_factory.begin() as s:
             res = s.execute(
                 update(ProductDB)
@@ -93,9 +98,11 @@ class ProductRepositoryDB:
                 raise ValueError("Stock insuffisant.")
 
     def release_stock(self, product_id: str, qty: int):
+        """Ré‑augmente le stock (annulation/remboursement)."""
         with self._session_factory.begin() as s:
             s.execute(
                 update(ProductDB)
                 .where(ProductDB.id == product_id)
                 .values(stock_qty=ProductDB.stock_qty + qty)
             )
+"""Dépôt SQLAlchemy des produits et gestion transactionnelle du stock."""

@@ -6,10 +6,12 @@ from models.db_models import PaymentDB
 
 
 class PaymentRepositoryDB:
+    """Dépôt des paiements (SQLAlchemy)."""
     def __init__(self, session_factory: sessionmaker):
         self._session_factory = session_factory
 
     def add(self, payment: Payment):
+        """Enregistre un paiement (transaction)."""
         with self._session_factory.begin() as s:
             s.add(PaymentDB(
                 id=payment.id,
@@ -23,6 +25,7 @@ class PaymentRepositoryDB:
             ))
 
     def get(self, payment_id: str) -> Optional[Payment]:
+        """Récupère un paiement par identifiant."""
         with self._session_factory() as s:
             r = s.get(PaymentDB, payment_id)
             if not r:
@@ -39,6 +42,7 @@ class PaymentRepositoryDB:
             )
 
     def list_all(self) -> list[Payment]:
+        """Liste tous les paiements."""
         with self._session_factory() as s:
             rows = s.query(PaymentDB).all()
             return [
@@ -54,3 +58,4 @@ class PaymentRepositoryDB:
                 )
                 for r in rows
             ]
+"""Dépôt SQLAlchemy des paiements."""

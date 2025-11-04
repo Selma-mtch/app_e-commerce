@@ -1,6 +1,6 @@
 """Routes du catalogue produits."""
 
-from flask import Blueprint, render_template, current_app, flash, redirect, url_for
+from flask import Blueprint, render_template, current_app, flash, redirect, url_for, request
 from flask_login import current_user
 
 catalog_bp = Blueprint('catalog', __name__, url_prefix='/catalog')
@@ -8,12 +8,18 @@ catalog_bp = Blueprint('catalog', __name__, url_prefix='/catalog')
 
 @catalog_bp.route('/products')
 def products():
-    """Liste des produits."""
+    """Liste des produits avec recherche simple par nom/description."""
+    q = request.args.get('q', '').strip()
     if current_user.is_authenticated and current_user.is_admin:
         # Les admins voient tous les produits (y compris désactivés)
         products = list(getattr(current_app.products_repo, '_by_id', {}).values())
     else:
         products = current_app.catalog_service.list_products()
+
+    if q:
+        ql = q.lower()
+        products = [p for p in products if ql in p.name.lower() or ql in p.description.lower()]
+
     return render_template('catalog/products.html', products=products)
 
 

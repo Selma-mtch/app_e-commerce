@@ -4,7 +4,7 @@ import logging
 import os
 from flask import Flask, render_template, session, current_app, request
 from flask_login import LoginManager, current_user
-from flask_wtf.csrf import CSRFProtect, generate_csrf
+from flask_wtf.csrf import CSRFProtect, generate_csrf, CSRFError
 from config import config
 from datetime import datetime
 
@@ -161,8 +161,15 @@ def create_app(config_name='default'):
     # Logging de base
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
 
-    # Sécurité: clé secrète obligatoire en production
-    if not app.config.get('DEBUG') and (not app.config.get('SECRET_KEY') or app.config['SECRET_KEY'] == 'dev-secret-key-change-in-production'):
+    # Sécurité: clé secrète obligatoire en production (pas en mode test)
+    if (
+        not app.config.get('DEBUG')
+        and not app.config.get('TESTING')
+        and (
+            not app.config.get('SECRET_KEY')
+            or app.config['SECRET_KEY'] == 'dev-secret-key-change-in-production'
+        )
+    ):
         raise RuntimeError('SECRET_KEY must be set in production')
     
     # Protection CSRF
@@ -268,4 +275,15 @@ def create_app(config_name='default'):
     @app.errorhandler(500)
     def server_error(e):
         return render_template('index.html'), 500
+
+    @app.errorhandler(CSRFError)
+    def handle_csrf_error(e):
+        """Gère proprement les erreurs CSRF.
+
+        Cas courant: la page catalogue a été rendue avant connexion, le token CSRF
+        est donc périmé après login. On affiche un message et on redirige vers la
+        page précédente (ou le catalogue) pour régénérer un token valide.
+        """
+        flash('Session expirée ou formulaire périmé. Veuillez réessayer.', 'warning')
+        return redirect(request.referrer or url_for('catalog.products'))
     return app

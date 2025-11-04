@@ -23,7 +23,7 @@ class CartRepositoryDB:
         if qty <= 0:
             return
         with self._session_factory().begin() as s:
-            # UPSERT-like: try update, if nothing updated, insert
+            # À la manière d'un UPSERT : tenter une mise à jour, sinon insérer
             res = s.execute(
                 update(CartItemDB)
                 .where(CartItemDB.user_id == user_id, CartItemDB.product_id == product_id)
@@ -37,17 +37,16 @@ class CartRepositoryDB:
             if qty <= 0:
                 s.execute(delete(CartItemDB).where(CartItemDB.user_id == user_id, CartItemDB.product_id == product_id))
                 return
-            # decrement and delete if <= 0
+            # Décrémenter et supprimer si <= 0
             res = s.execute(
                 update(CartItemDB)
                 .where(CartItemDB.user_id == user_id, CartItemDB.product_id == product_id)
                 .values(quantity=CartItemDB.quantity - qty)
             )
-            # Cleanup negatives
+            # Nettoyage des valeurs négatives
             s.execute(delete(CartItemDB).where(CartItemDB.user_id == user_id, CartItemDB.product_id == product_id, CartItemDB.quantity <= 0))
 
     def remove_product_everywhere(self, product_id: str) -> int:
         with self._session_factory().begin() as s:
             res = s.execute(delete(CartItemDB).where(CartItemDB.product_id == product_id))
             return res.rowcount or 0
-

@@ -1,7 +1,11 @@
-"""Compatibility shim exposing project modules under the 'ecommerce.*' namespace.
+"""Shim de compatibilité exposant les modules du projet sous l'espace de noms « ecommerce.* ».
 
-This lets tests import e.g. 'from ecommerce.models.user import User'
-without restructuring the repo. We alias both packages and their submodules.
+Ceci permet aux tests d'importer, par exemple, « from ecommerce.models.user import User »
+sans restructurer le dépôt. Nous créons des alias pour les paquets et leurs sous‑modules.
+
+Remarque : nous n'aliasons volontairement pas le paquet « web », car son importation
+entraîne le chargement d'extensions Flask non nécessaires aux tests et potentiellement
+absentes de l'environnement d'intégration continue (CI).
 """
 
 from __future__ import annotations
@@ -14,10 +18,10 @@ from types import ModuleType
 
 def _alias_tree(alias_prefix: str, real_pkg_name: str):
     real_pkg = importlib.import_module(real_pkg_name)
-    # Register the alias package itself
+    # Enregistrer le paquet d'alias lui‑même
     sys.modules[alias_prefix] = real_pkg
 
-    # If it's a package, walk its submodules and alias them too
+    # S'il s'agit d'un paquet, parcourir ses sous‑modules et les aliaser également
     if hasattr(real_pkg, "__path__"):
         for finder, full_name, ispkg in pkgutil.walk_packages(real_pkg.__path__, real_pkg.__name__ + "."):
             alias_name = alias_prefix + full_name[len(real_pkg.__name__):]
@@ -28,11 +32,10 @@ def _alias_tree(alias_prefix: str, real_pkg_name: str):
             sys.modules[alias_name] = mod
 
 
-# Ensure root package exists
+# S'assurer que le paquet racine existe
 sys.modules.setdefault('ecommerce', sys.modules[__name__])
 
-# Alias known top-level namespaces and all their submodules
+# Créer des alias pour les espaces de noms connus et tous leurs sous‑modules
 _alias_tree('ecommerce.models', 'models')
 _alias_tree('ecommerce.repositories', 'repositories')
 _alias_tree('ecommerce.services', 'services')
-_alias_tree('ecommerce.web', 'web')

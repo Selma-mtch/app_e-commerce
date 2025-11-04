@@ -104,7 +104,7 @@ class OrderRepositoryDB:
                     payment_id=order.payment_id,
                 )
             )
-            # Upsert delivery
+            # Mettre à jour ou insérer la livraison (upsert)
             if order.delivery:
                 d = order.delivery
                 existing = s.scalars(select(DeliveryDB).where(DeliveryDB.order_id == order.id)).first()
@@ -122,4 +122,3 @@ class OrderRepositoryDB:
                         address=d.address,
                         status=d.status,
                     ))
-

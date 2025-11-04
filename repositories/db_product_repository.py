@@ -7,9 +7,9 @@ from models.db_models import ProductDB
 
 
 class ProductRepositoryDB:
-    """SQL-backed Product repository implementing the same interface.
+    """Dépôt de produits basé sur SQL implémentant la même interface.
 
-    Methods: add, get, list_active, reserve_stock, release_stock
+    Méthodes : add, get, list_active, reserve_stock, release_stock
     """
 
     def __init__(self, session_factory: sessionmaker):
@@ -83,4 +83,3 @@ class ProductRepositoryDB:
                 .where(ProductDB.id == product_id)
                 .values(stock_qty=ProductDB.stock_qty + qty)
             )
-

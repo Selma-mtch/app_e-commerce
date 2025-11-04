@@ -1,4 +1,4 @@
-from typing import List  # not used directly; kept for compatibility
+from typing import List  # non utilisé directement ; conservé pour compatibilité
 from dataclasses import dataclass
 
 

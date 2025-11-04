@@ -66,7 +66,7 @@ class ProductRepositoryDB:
             ]
 
     def reserve_stock(self, product_id: str, qty: int):
-        with self._session_factory().begin() as s:
+        with self._session_factory.begin() as s:
             res = s.execute(
                 update(ProductDB)
                 .where(ProductDB.id == product_id)
@@ -77,7 +77,7 @@ class ProductRepositoryDB:
                 raise ValueError("Stock insuffisant.")
 
     def release_stock(self, product_id: str, qty: int):
-        with self._session_factory().begin() as s:
+        with self._session_factory.begin() as s:
             s.execute(
                 update(ProductDB)
                 .where(ProductDB.id == product_id)

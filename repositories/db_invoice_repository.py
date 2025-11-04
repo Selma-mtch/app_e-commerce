@@ -12,7 +12,7 @@ class InvoiceRepositoryDB:
         self._session_factory = session_factory
 
     def add(self, invoice: Invoice):
-        with self._session_factory().begin() as s:
+        with self._session_factory.begin() as s:
             s.add(InvoiceDB(
                 id=invoice.id,
                 order_id=invoice.order_id,
@@ -44,4 +44,3 @@ class InvoiceRepositoryDB:
                 total_cents=r.total_cents,
                 issued_at=r.issued_at,
             )
-

@@ -10,7 +10,7 @@ class PaymentRepositoryDB:
         self._session_factory = session_factory
 
     def add(self, payment: Payment):
-        with self._session_factory().begin() as s:
+        with self._session_factory.begin() as s:
             s.add(PaymentDB(
                 id=payment.id,
                 order_id=payment.order_id,
@@ -37,4 +37,3 @@ class PaymentRepositoryDB:
                 succeeded=r.succeeded,
                 created_at=r.created_at,
             )
-

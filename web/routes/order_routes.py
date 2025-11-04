@@ -50,7 +50,8 @@ def checkout():
             flash(str(e), 'danger')
     
     cart = current_app.cart_service.view_cart(session['user_id'])
-    total = current_app.cart_service.cart_total(session['user_id'])
+    total_cents = current_app.cart_service.cart_total(session['user_id'])
+    total = (total_cents or 0) / 100
     
     if not cart.items:
         flash('Votre panier est vide.', 'warning')

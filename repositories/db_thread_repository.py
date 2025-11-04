@@ -55,3 +55,8 @@ class ThreadRepositoryDB:
             t = s.get(ThreadDB, thread_id)
             if t:
                 t.closed = True
+
+    def list_all(self) -> list[MessageThread]:
+        with self._session_factory() as s:
+            rows = s.scalars(select(ThreadDB)).all()
+            return [MessageThread(id=t.id, user_id=t.user_id, order_id=t.order_id, subject=t.subject, messages=[], closed=t.closed) for t in rows]

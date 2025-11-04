@@ -18,3 +18,7 @@ class InvoiceRepository:
     def get(self, invoice_id: str) -> Optional[Invoice]:
         """Récupère une facture par son ID."""
         return self._by_id.get(invoice_id)
+
+    def list_all(self) -> list[Invoice]:
+        """Liste toutes les factures."""
+        return list(self._by_id.values())

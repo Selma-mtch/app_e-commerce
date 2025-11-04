@@ -37,3 +37,20 @@ class PaymentRepositoryDB:
                 succeeded=r.succeeded,
                 created_at=r.created_at,
             )
+
+    def list_all(self) -> list[Payment]:
+        with self._session_factory() as s:
+            rows = s.query(PaymentDB).all()
+            return [
+                Payment(
+                    id=r.id,
+                    order_id=r.order_id,
+                    user_id=r.user_id,
+                    amount_cents=r.amount_cents,
+                    provider=r.provider,
+                    provider_ref=r.provider_ref or '',
+                    succeeded=r.succeeded,
+                    created_at=r.created_at,
+                )
+                for r in rows
+            ]

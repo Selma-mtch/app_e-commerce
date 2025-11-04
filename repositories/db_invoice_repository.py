@@ -44,3 +44,19 @@ class InvoiceRepositoryDB:
                 total_cents=r.total_cents,
                 issued_at=r.issued_at,
             )
+
+    def list_all(self) -> list[Invoice]:
+        with self._session_factory() as s:
+            rows = s.scalars(select(InvoiceDB)).all()
+            result: list[Invoice] = []
+            for r in rows:
+                lines = s.scalars(select(InvoiceLineDB).where(InvoiceLineDB.invoice_id == r.id)).all()
+                result.append(Invoice(
+                    id=r.id,
+                    order_id=r.order_id,
+                    user_id=r.user_id,
+                    lines=[InvoiceLine(product_id=x.product_id, name=x.name, unit_price_cents=x.unit_price_cents, quantity=x.quantity) for x in lines],
+                    total_cents=r.total_cents,
+                    issued_at=r.issued_at,
+                ))
+            return result

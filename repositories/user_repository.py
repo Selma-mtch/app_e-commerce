@@ -56,3 +56,7 @@ class UserRepository:
         if not user:
             return
         user.password_hash = new_hash
+
+    def list_all(self) -> list[User]:
+        """Liste tous les utilisateurs."""
+        return list(self._by_id.values())

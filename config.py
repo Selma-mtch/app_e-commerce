@@ -20,6 +20,8 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """Configuration de production."""
     DEBUG = False
+    # Ne pas charger de données de démo en production
+    LOAD_SAMPLE_DATA = False
     DB_AUTO_CREATE = True  # Render sans predeploy: créer les tables au démarrage
 
 

@@ -12,7 +12,10 @@ def products():
     q = request.args.get('q', '').strip()
     if current_user.is_authenticated and current_user.is_admin:
         # Les admins voient tous les produits (y compris désactivés)
-        products = list(getattr(current_app.products_repo, '_by_id', {}).values())
+        if hasattr(current_app.products_repo, 'list_all'):
+            products = current_app.products_repo.list_all()
+        else:
+            products = list(getattr(current_app.products_repo, '_by_id', {}).values())
     else:
         products = current_app.catalog_service.list_products()
 

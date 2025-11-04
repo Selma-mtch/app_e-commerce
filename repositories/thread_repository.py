@@ -28,3 +28,7 @@ class ThreadRepository:
         th = self._by_id.get(thread_id)
         if th:
             th.messages.append(message)
+
+    def list_all(self) -> list[MessageThread]:
+        """Liste tous les tickets."""
+        return list(self._by_id.values())

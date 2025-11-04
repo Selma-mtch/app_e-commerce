@@ -25,6 +25,7 @@
           <div class="mb-3">
             <h6 class="text-secondary">Adresse :</h6>
             <form method="post" class="d-flex align-items-center" action="{{ url_for('auth.profile') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <input type="text" class="form-control me-2" name="address" value="{{ current_user.address or '' }}" placeholder="Votre adresse">
               <button type="submit" class="btn btn-primary">Mettre à jour</button>
             </form>

@@ -1,5 +1,4 @@
-from ast import Dict, List
-from typing import Optional
+from typing import Dict, List, Optional
 
 from models.support import MessageThread
 
@@ -23,3 +22,9 @@ class ThreadRepository:
     def list_by_user(self, user_id: str) -> list[MessageThread]:
         """Liste tous les fils d'un utilisateur."""
         return [t for t in self._by_id.values() if t.user_id == user_id]
+
+    # Optionnel: support d'ajout de message pour compat DB
+    def add_message(self, thread_id: str, message):
+        th = self._by_id.get(thread_id)
+        if th:
+            th.messages.append(message)

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Admin — Produits{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Produits</h2>
+  {% if products %}
+  <table class="table table-striped align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>Nom</th>
+        <th>Prix</th>
+        <th>Stock</th>
+        <th>Actif</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in products %}
+      <tr>
+        <td>{{ p.name }}</td>
+        <td>{{ "%.2f"|format(p.price_cents/100) }} €</td>
+        <td>{{ p.stock_qty }}</td>
+        <td>{% if p.active %}<span class="badge bg-success">Oui</span>{% else %}<span class="badge bg-secondary">Non</span>{% endif %}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.toggle_product', product_id=p.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-outline-primary">{{ 'Désactiver' if p.active else 'Activer' }}</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <div class="alert alert-info">Aucun produit.</div>
+  {% endif %}
+</div>
+{% endblock %}

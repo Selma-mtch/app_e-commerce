@@ -1,4 +1,4 @@
-from ast import List
+from typing import List  # non utilisé directement ; conservé pour compatibilité
 from dataclasses import dataclass
 
 

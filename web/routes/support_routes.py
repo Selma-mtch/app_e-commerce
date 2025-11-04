@@ -39,14 +39,23 @@ def new_thread():
     return render_template('support/new_thread.html', orders=orders)
 
 
-@support_bp.route('/threads/<thread_id>')
+@support_bp.route('/threads/<thread_id>', methods=['GET', 'POST'])
 @login_required
 def thread_detail(thread_id):
-    """Détail d'un ticket."""
+    """Détail d'un ticket et réponse."""
     thread = current_app.customer_service.get_thread(thread_id)
     if not thread or thread.user_id != session['user_id']:
         flash('Ticket introuvable.', 'danger')
         return redirect(url_for('support.threads'))
+
+    if request.method == 'POST':
+        try:
+            body = request.form['message']
+            current_app.customer_service.post_message(thread_id=thread.id, author_user_id=session['user_id'], body=body)
+            flash('Message envoyé.', 'success')
+            return redirect(url_for('support.thread_detail', thread_id=thread.id))
+        except ValueError as e:
+            flash(str(e), 'danger')
     
     return render_template('support/thread_detail.html', thread=thread)
 

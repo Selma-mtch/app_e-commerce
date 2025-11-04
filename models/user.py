@@ -37,5 +37,6 @@ class User(UserMixin):
             if hasattr(self, k) and k not in {"id", "email", "is_admin", "password_hash"}:
                 setattr(self, k, v)
 
-def get_id(self):
-        return str(self.id)
+    # UserMixin fournit déjà get_id(); si besoin de surcharger :
+    # def get_id(self) -> str:
+    #     return str(self.id)

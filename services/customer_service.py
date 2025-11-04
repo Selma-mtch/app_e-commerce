@@ -107,7 +107,11 @@ class CustomerService:
             body=body,
             created_at=time.time()
         )
-        thread.messages.append(message)
+        # Persister via le repository si possible
+        if hasattr(self.threads, 'add_message'):
+            self.threads.add_message(thread_id, message)
+        else:
+            thread.messages.append(message)
         return message
 
     def close_thread(self, thread_id: str, admin_user_id: str) -> MessageThread:
@@ -137,6 +141,9 @@ class CustomerService:
             raise ValueError("Fil de discussion introuvable.")
 
         thread.closed = True
+        # Persister via repo si disponible
+        if hasattr(self.threads, 'close'):
+            self.threads.close(thread_id)
         return thread
 
     def list_user_threads(self, user_id: str) -> list[MessageThread]:

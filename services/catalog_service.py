@@ -1,4 +1,4 @@
-from ast import List
+from typing import List
 from models.product import Product
 from repositories.product_repository import ProductRepository
 

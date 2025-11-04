@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Admin — Commandes{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Toutes les commandes</h2>
+  {% if orders %}
+  <table class="table table-striped align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>ID</th>
+        <th>Client</th>
+        <th>Total</th>
+        <th>Statut</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td><code>{{ o.id[:8] }}…</code></td>
+        <td>{{ o.user_id }}</td>
+        <td>{{ "%.2f"|format(o.total_cents()/100) }} €</td>
+        <td><span class="badge bg-primary">{{ o.status.name }}</span></td>
+        <td class="d-flex gap-2">
+          {% if o.status.name == 'CREE' %}
+          <form method="post" action="{{ url_for('admin.validate_order', order_id=o.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-outline-primary">Valider</button>
+          </form>
+          {% endif %}
+          {% if o.status.name in ['PAYEE'] %}
+          <form method="post" action="{{ url_for('admin.ship_order', order_id=o.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-outline-secondary">Expédier</button>
+          </form>
+          {% endif %}
+          {% if o.status.name in ['EXPEDIEE'] %}
+          <form method="post" action="{{ url_for('admin.mark_delivered', order_id=o.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-outline-success">Livrée</button>
+          </form>
+          {% endif %}
+          {% if o.status.name in ['PAYEE','ANNULEE'] %}
+          <form method="post" action="{{ url_for('admin.refund_order', order_id=o.id) }}" class="d-flex gap-1">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input name="amount_cents" type="number" class="form-control form-control-sm" placeholder="Montant (cts)">
+            <button class="btn btn-sm btn-outline-danger">Rembourser</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <div class="alert alert-info">Aucune commande.</div>
+  {% endif %}
+</div>
+{% endblock %}

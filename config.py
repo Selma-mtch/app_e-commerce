@@ -8,6 +8,8 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     DEBUG = False
     TESTING = False
+    LOAD_SAMPLE_DATA = True
+    DB_AUTO_CREATE = True  # crée les tables si nécessaire quand la DB est active
 
 
 class DevelopmentConfig(Config):
@@ -18,11 +20,13 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """Configuration de production."""
     DEBUG = False
+    DB_AUTO_CREATE = True  # Render sans predeploy: créer les tables au démarrage
 
 
 class TestingConfig(Config):
     """Configuration de test."""
     TESTING = True
+    LOAD_SAMPLE_DATA = False
 
 
 config = {

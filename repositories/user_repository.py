@@ -1,5 +1,4 @@
-from ast import Dict
-from typing import Optional
+from typing import Dict, Optional
 from services.auth.password_hasher import PasswordHasher
 
 from models.user import User

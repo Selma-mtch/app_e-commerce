@@ -22,11 +22,18 @@ class CartService:
         product = self.products.get(product_id)
         if not product:
             raise ValueError("Produit introuvable.")
-        self.carts.get_or_create(user_id).add(product, qty)
+        # Si le repository supporte une persistance, utiliser son API
+        if hasattr(self.carts, 'add_item'):
+            self.carts.add_item(user_id, product_id, qty)
+        else:
+            self.carts.get_or_create(user_id).add(product, qty)
 
     def remove_from_cart(self, user_id: str, product_id: str, qty: int = 1):
         """Retire un produit du panier."""
-        self.carts.get_or_create(user_id).remove(product_id, qty)
+        if hasattr(self.carts, 'remove_item'):
+            self.carts.remove_item(user_id, product_id, qty)
+        else:
+            self.carts.get_or_create(user_id).remove(product_id, qty)
 
     def view_cart(self, user_id: str) -> Cart:
         """Affiche le panier d'un utilisateur."""

@@ -12,6 +12,7 @@
         </div>
 
         <form action="{{ url_for('orders.checkout') }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="mb-3">
                 <label for="card_number" class="form-label">Numéro de carte</label>
                 <input type="text" class="form-control" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" required>

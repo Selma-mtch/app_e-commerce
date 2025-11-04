@@ -57,3 +57,15 @@ def checkout():
         return redirect(url_for('catalog.products'))
     
     return render_template('orders/checkout.html', total=total)
+
+
+@order_bp.route('/<order_id>/cancel', methods=['POST'])
+@login_required
+def cancel(order_id):
+    """Annuler une commande par l'utilisateur."""
+    try:
+        order = current_app.order_service.request_cancellation(session['user_id'], order_id)
+        flash('Commande annulée.', 'info')
+    except ValueError as e:
+        flash(str(e), 'danger')
+    return redirect(url_for('orders.detail', order_id=order_id))

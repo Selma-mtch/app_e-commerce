@@ -72,3 +72,59 @@ class AuthService:
     def logout(self, token: str):
         """Déconnecte un utilisateur."""
         self.sessions.destroy_session(token)
+
+    # --- Nouvelles fonctionnalités de profil ---
+    def change_email(self, user_id: str, current_password: str, new_email: str) -> User:
+        """Change l'adresse email de l'utilisateur après vérification du mot de passe.
+
+        Raises:
+            ValueError: si l'utilisateur est introuvable, mot de passe invalide,
+                       ou email déjà utilisé.
+        """
+        user = self.users.get(user_id)
+        if not user:
+            raise ValueError("Utilisateur introuvable.")
+
+        if not PasswordHasher.verify(current_password, user.password_hash):
+            raise ValueError("Mot de passe actuel invalide.")
+
+        new_email_norm = (new_email or "").strip()
+        if not new_email_norm:
+            raise ValueError("Nouvel email requis.")
+
+        other = self.users.get_by_email(new_email_norm)
+        if other and other.id != user.id:
+            raise ValueError("Email déjà utilisé.")
+
+        if hasattr(self.users, 'update_email'):
+            self.users.update_email(user.id, new_email_norm)
+            updated = self.users.get(user.id)
+        else:
+            user.email = new_email_norm
+            self.users.add(user)
+            updated = user
+        return updated
+
+    def change_password(self, user_id: str, current_password: str, new_password: str) -> None:
+        """Change le mot de passe de l'utilisateur.
+
+        Raises:
+            ValueError: si l'utilisateur est introuvable, si le mot de passe actuel est invalide,
+                       ou si le nouveau mot de passe ne respecte pas les contraintes minimales.
+        """
+        user = self.users.get(user_id)
+        if not user:
+            raise ValueError("Utilisateur introuvable.")
+
+        if not PasswordHasher.verify(current_password, user.password_hash):
+            raise ValueError("Mot de passe actuel invalide.")
+
+        if not new_password or len(new_password) < 8:
+            raise ValueError("Le nouveau mot de passe doit contenir au moins 8 caractères.")
+
+        new_hash = PasswordHasher.hash(new_password)
+        if hasattr(self.users, 'update_password'):
+            self.users.update_password(user.id, new_hash)
+        else:
+            user.password_hash = new_hash
+            self.users.add(user)

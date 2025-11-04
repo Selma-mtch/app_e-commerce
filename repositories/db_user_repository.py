@@ -62,3 +62,19 @@ class UserRepositoryDB:
                 is_admin=r.is_admin,
             )
 
+    # --- Mises à jour spécifiques ---
+    def update_email(self, user_id: str, new_email: str) -> None:
+        with self._session_factory() as s:
+            row = s.get(UserDB, user_id)
+            if not row:
+                return
+            row.email = new_email
+            s.commit()
+
+    def update_password(self, user_id: str, new_hash: str) -> None:
+        with self._session_factory() as s:
+            row = s.get(UserDB, user_id)
+            if not row:
+                return
+            row.password_hash = new_hash
+            s.commit()

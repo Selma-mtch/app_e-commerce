@@ -66,14 +66,33 @@ def profile():
     user = current_app.users_repo.get(session['user_id'])
 
     if request.method == 'POST':
+        action = request.form.get('action')
         try:
-            # Mettre à jour uniquement les champs autorisés
-            user.update_profile(
-                first_name=request.form.get('first_name', user.first_name),
-                last_name=request.form.get('last_name', user.last_name),
-                address=request.form.get('address', user.address)
-            )
-            flash("Profil mis à jour avec succès.", "success")
+            if action == 'update_profile':
+                # Mettre à jour uniquement les champs autorisés
+                user.update_profile(
+                    first_name=request.form.get('first_name', user.first_name),
+                    last_name=request.form.get('last_name', user.last_name),
+                    address=request.form.get('address', user.address)
+                )
+                # Persister les changements (utile notamment en mode DB)
+                current_app.users_repo.add(user)
+                flash("Profil mis à jour avec succès.", "success")
+            elif action == 'change_email':
+                current_password = request.form.get('current_password', '')
+                new_email = request.form.get('new_email', '')
+                current_app.auth_service.change_email(user.id, current_password, new_email)
+                flash("Adresse email mise à jour.", "success")
+            elif action == 'change_password':
+                current_password = request.form.get('current_password', '')
+                new_password = request.form.get('new_password', '')
+                confirm = request.form.get('confirm_password', '')
+                if new_password != confirm:
+                    raise ValueError("La confirmation ne correspond pas au nouveau mot de passe.")
+                current_app.auth_service.change_password(user.id, current_password, new_password)
+                flash("Mot de passe mis à jour.", "success")
+            else:
+                flash("Action non reconnue.", "warning")
             return redirect(url_for('auth.profile'))
         except Exception as e:
             flash(f"Erreur lors de la mise à jour : {str(e)}", "danger")

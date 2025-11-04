@@ -1,17 +1,20 @@
+import bcrypt
+
+
 class PasswordHasher:
-    """
-    Utilitaire de hachage de mots de passe.
-    
-    Note: Implémentation simplifiée pour la démo.
-          En production, utiliser bcrypt, argon2 ou scrypt.
-    """
-    
     @staticmethod
     def hash(password: str) -> str:
-        """Hache un mot de passe."""
-        return f"sha256::{hash(password)}"
+        hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        return hashed.decode("utf-8")
 
     @staticmethod
     def verify(password: str, stored_hash: str) -> bool:
-        """Vérifie qu'un mot de passe correspond au hash."""
-        return PasswordHasher.hash(password) == stored_hash
+        if stored_hash.startswith("sha256::"):
+            try:
+                return f"sha256::{hash(password)}" == stored_hash
+            except Exception:
+                return False
+        try:
+            return bcrypt.checkpw(password.encode("utf-8"), stored_hash.encode("utf-8"))
+        except Exception:
+            return False

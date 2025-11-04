@@ -1,5 +1,5 @@
 <div class="card product-card h-100 shadow-sm position-relative">
-  <img src="{{ product.image_url or url_for('static', filename='img/default-product.jpg') }}" class="card-img-top" alt="{{ product.name }}">
+  <img src="{{ product.image_url or url_for('static', filename='img/default-product.svg') }}" class="card-img-top" alt="{{ product.name }}">
   {% if current_user.is_authenticated and current_user.is_admin and not product.active %}
     <span class="badge bg-secondary position-absolute top-0 start-0 m-2">Désactivé</span>
   {% endif %}

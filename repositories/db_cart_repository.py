@@ -6,10 +6,16 @@ from models.db_models import CartItemDB
 
 
 class CartRepositoryDB:
+    """Dépôt panier basé sur SQLAlchemy.
+
+    Fournit des opérations de lecture/écriture des items de panier pour un
+    utilisateur, avec transactions atomiques.
+    """
     def __init__(self, session_factory: sessionmaker):
         self._session_factory = session_factory
 
     def get_or_create(self, user_id: str) -> Cart:
+        """Récupère le panier de l'utilisateur, ou un panier vide s'il n'existe pas."""
         with self._session_factory() as s:
             rows = s.scalars(select(CartItemDB).where(CartItemDB.user_id == user_id)).all()
             items = {r.product_id: CartItem(product_id=r.product_id, quantity=r.quantity) for r in rows}
@@ -21,6 +27,7 @@ class CartRepositoryDB:
             s.execute(delete(CartItemDB).where(CartItemDB.user_id == user_id))
 
     def add_item(self, user_id: str, product_id: str, qty: int = 1):
+        """Ajoute une quantité au panier (UPSERT). Ignore si ``qty<=0``."""
         if qty <= 0:
             return
         with self._session_factory.begin() as s:
@@ -34,6 +41,7 @@ class CartRepositoryDB:
                 s.add(CartItemDB(user_id=user_id, product_id=product_id, quantity=qty))
 
     def remove_item(self, user_id: str, product_id: str, qty: int = 1):
+        """Retire une quantité ou supprime la ligne si ``qty<=0`` ou résultat ≤ 0."""
         with self._session_factory.begin() as s:
             if qty <= 0:
                 s.execute(delete(CartItemDB).where(CartItemDB.user_id == user_id, CartItemDB.product_id == product_id))
@@ -48,6 +56,8 @@ class CartRepositoryDB:
             s.execute(delete(CartItemDB).where(CartItemDB.user_id == user_id, CartItemDB.product_id == product_id, CartItemDB.quantity <= 0))
 
     def remove_product_everywhere(self, product_id: str) -> int:
+        """Retire un produit de tous les paniers. Retourne le nombre de paniers affectés."""
         with self._session_factory.begin() as s:
             res = s.execute(delete(CartItemDB).where(CartItemDB.product_id == product_id))
             return res.rowcount or 0
+"""Dépôt SQLAlchemy pour la gestion des paniers (lecture/écriture des items)."""

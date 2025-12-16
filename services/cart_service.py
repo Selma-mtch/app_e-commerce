@@ -42,3 +42,25 @@ class CartService:
     def cart_total(self, user_id: str) -> int:
         """Calcule le total du panier en centimes."""
         return self.carts.get_or_create(user_id).total_cents(self.products)
+
+    def set_quantity(self, user_id: str, product_id: str, qty: int) -> None:
+        """
+        Met à jour directement la quantité d'un article dans le panier.
+
+        Si ``qty <= 0``, l'article est retiré.
+        """
+        # Valide que le produit existe (comportement aligné avec add_to_cart)
+        product = self.products.get(product_id)
+        if not product:
+            raise ValueError("Produit introuvable.")
+
+        # Délègue au dépôt s'il expose une API dédiée, sinon met à jour le Cart en mémoire
+        if hasattr(self.carts, "set_quantity"):
+            self.carts.set_quantity(user_id, product_id, qty)
+            return
+
+        cart = self.carts.get_or_create(user_id)
+        if qty <= 0:
+            cart.remove(product_id, qty=0)
+        else:
+            cart.items[product_id] = CartItem(product_id=product_id, quantity=qty)

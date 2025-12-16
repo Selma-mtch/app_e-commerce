@@ -15,7 +15,7 @@
         <input class="form-control form-control-sm me-2" type="search" name="q" placeholder="Rechercher produit..." value="{{ request.args.get('q', '') }}">
       </form>
 
-      <ul class="navbar-nav mb-2 mb-lg-0">
+      <!-- <ul class="navbar-nav mb-2 mb-lg-0">
         {% if current_user.is_authenticated %}
           {% if current_user.is_admin %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.dashboard') }}">Admin</a></li>
@@ -25,6 +25,44 @@
           {% else %}
           <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Se connecter</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.register') }}">S'inscrire</a></li>
+        {% endif %}
+      </ul> -->
+
+      <ul class="navbar-nav mb-2 mb-lg-0">
+        {% if current_user.is_authenticated %}
+          {% if current_user.is_admin %}
+            <li class="nav-item">
+              <a class="nav-link {% if request.endpoint.startswith('admin.') %}active{% endif %}"
+                 href="{{ url_for('admin.dashboard') }}">Admin</a>
+            </li>
+          {% endif %}
+          <li class="nav-item">
+            <a class="nav-link {% if request.endpoint.startswith('user.') %}active{% endif %}"
+               href="{{ url_for('user.account') }}">{{ current_user.email }}</a>
+          </li>
+        {% endif %}
+      
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint.startswith('orders.') %}active{% endif %}"
+             href="{{ url_for('orders.list_orders') }}">Mes commandes</a>
+        </li>
+      
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint.startswith('cart.') %}active{% endif %}"
+             href="{{ url_for('cart.view') }}">
+            Panier <span class="badge bg-primary" id="cart-count">{{ cart_count or 0 }}</span>
+          </a>
+        </li>
+      
+        {% if not current_user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'auth.login' %}active{% endif %}"
+               href="{{ url_for('auth.login') }}">Se connecter</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'auth.register' %}active{% endif %}"
+               href="{{ url_for('auth.register') }}">S'inscrire</a>
+          </li>
         {% endif %}
       </ul>
     </div>

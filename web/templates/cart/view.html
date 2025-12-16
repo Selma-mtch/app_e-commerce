@@ -7,42 +7,98 @@
     <h2 class="mb-4">🛒 Mon Panier</h2>
 
     {% if items %}
-        <table class="table table-bordered align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Produit</th>
-                    <th>Prix unitaire</th>
-                    <th>Quantité</th>
-                    <th>Total</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in items %}
-                    <tr>
-                        <td>{{ item.product.name }}</td>
-                        <td>{{ "%.2f"|format(item.price) }} €</td>
-                        <td>{{ item.quantity }}</td>
-                        <td>{{ "%.2f"|format(item.total) }} €</td>
-                        <td>
-                            <form action="{{ url_for('cart.remove', product_id=item.product.id) }}" method="post" style="display:inline;">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Supprimer</button>
-                            </form>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Produit</th>
+                                <th class="text-center">Quantité</th>
+                                <th class="text-end">Prix unitaire</th>
+                                <th class="text-end">Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <a href="{{ url_for('catalog.product_detail', product_id=item.product.id) }}"
+                                               class="fw-semibold text-decoration-none">
+                                                {{ item.product.name }}
+                                            </a>
+                                            <small class="text-muted">Réf. {{ item.product.id }}</small>
+                                        </div>
+                                    </td>
+                                    <td class="text-center" style="max-width: 120px;">
+                                        <form action="{{ url_for('cart.update_quantity', product_id=item.product.id) }}"
+                                              method="post"
+                                              class="d-inline-flex align-items-center gap-1 justify-content-center">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="number"
+                                                   name="quantity"
+                                                   min="0"
+                                                   value="{{ item.quantity }}"
+                                                   class="form-control form-control-sm text-center"
+                                                   style="width: 70px;">
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                                OK
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td class="text-end">{{ "%.2f"|format(item.price) }} €</td>
+                                    <td class="text-end fw-semibold">{{ "%.2f"|format(item.total) }} €</td>
+                                    <td class="text-end">
+                                        <form action="{{ url_for('cart.remove', product_id=item.product.id) }}"
+                                              method="post"
+                                              class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                Supprimer
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-        <div class="text-end mt-3">
-            <h4>Total : <strong>{{ "%.2f"|format(total) }} €</strong></h4>
-            <a href="{{ url_for('orders.checkout') }}" class="btn btn-success mt-2">
-                Passer la commande
-            </a>
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Récapitulatif</h5>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Sous-total</span>
+                            <span>{{ "%.2f"|format(total) }} €</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Livraison estimée</span>
+                            <span>Gratuite</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="fw-semibold">Total</span>
+                            <span class="fw-bold h5 mb-0">{{ "%.2f"|format(total) }} €</span>
+                        </div>
+                        <a href="{{ url_for('orders.checkout') }}" class="btn btn-success w-100 mb-2">
+                            Passer la commande
+                        </a>
+                        <a href="{{ url_for('catalog.products') }}" class="btn btn-outline-secondary w-100 btn-sm">
+                            Continuer mes achats
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     {% else %}
-        <div class="alert alert-info">Votre panier est vide.</div>
+        <div class="alert alert-info">
+            Votre panier est vide.
+            <a href="{{ url_for('catalog.products') }}" class="alert-link">Voir les produits</a>
+        </div>
     {% endif %}
 </div>
 {% endblock %}

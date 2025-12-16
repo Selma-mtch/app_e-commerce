@@ -1,6 +1,6 @@
 from typing import Dict
 
-from models.product import Cart
+from models.product import Cart, CartItem
 
 
 class CartRepository:
@@ -37,6 +37,20 @@ class CartRepository:
                 del cart.items[product_id]
                 affected += 1
         return affected
+
+    def set_quantity(self, user_id: str, product_id: str, qty: int) -> None:
+        """
+        Définit explicitement la quantité pour un produit dans le panier.
+
+        Si ``qty <= 0``, l'article est retiré du panier.
+        """
+        cart = self.get_or_create(user_id)
+        if qty <= 0:
+            cart.remove(product_id, qty=0)
+            return
+
+        # Met à jour ou crée l'item avec la quantité demandée
+        cart.items[product_id] = CartItem(product_id=product_id, quantity=qty)
 
     # API complémentaire pour compat avec une implémentation DB
     def add_item(self, user_id: str, product_id: str, qty: int = 1):

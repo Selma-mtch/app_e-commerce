@@ -55,6 +55,26 @@ class CartRepositoryDB:
             # Nettoyage des valeurs négatives
             s.execute(delete(CartItemDB).where(CartItemDB.user_id == user_id, CartItemDB.product_id == product_id, CartItemDB.quantity <= 0))
 
+    def set_quantity(self, user_id: str, product_id: str, qty: int) -> None:
+        """Fixe directement la quantité pour un item de panier (UPSERT ou suppression)."""
+        with self._session_factory.begin() as s:
+            if qty <= 0:
+                s.execute(
+                    delete(CartItemDB).where(
+                        CartItemDB.user_id == user_id,
+                        CartItemDB.product_id == product_id,
+                    )
+                )
+                return
+
+            res = s.execute(
+                update(CartItemDB)
+                .where(CartItemDB.user_id == user_id, CartItemDB.product_id == product_id)
+                .values(quantity=qty)
+            )
+            if res.rowcount == 0:
+                s.add(CartItemDB(user_id=user_id, product_id=product_id, quantity=qty))
+
     def remove_product_everywhere(self, product_id: str) -> int:
         """Retire un produit de tous les paniers. Retourne le nombre de paniers affectés."""
         with self._session_factory.begin() as s:

@@ -48,11 +48,37 @@ body {
   object-fit: cover;
   border-bottom: 1px solid #eee;
 }
+.product-card .card-body {
+  position: relative;
+}
 .product-card .card-title {
   font-size: 0.95rem;
 }
 .product-card .btn {
   font-size: 0.8rem;
+}
+
+.product-description-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-detail-card {
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.product-detail-image {
+  max-height: 420px;
+  object-fit: contain;
+  background-color: #f8f9fa;
+}
+
+.badge-soft-success {
+  background-color: rgba(25, 135, 84, 0.1);
+  color: #198754;
 }
 
 /* --- Boutons --- */

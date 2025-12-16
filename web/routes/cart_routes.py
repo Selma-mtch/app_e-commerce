@@ -94,3 +94,24 @@ def remove(product_id):
     current_app.cart_service.remove_from_cart(session['user_id'], product_id, qty=0)
     flash('Produit retiré du panier.', 'info')
     return redirect(url_for('cart.view'))
+
+
+@cart_bp.route('/update/<product_id>', methods=['POST'])
+@login_required
+def update_quantity(product_id):
+    """Met à jour la quantité d'un article dans le panier."""
+    qty_raw = request.form.get('quantity', '1')
+    try:
+        qty = int(qty_raw)
+    except (TypeError, ValueError):
+        qty = 1
+
+    try:
+        current_app.cart_service.set_quantity(session['user_id'], product_id, qty)
+        flash('Quantité mise à jour.', 'success')
+    except ValueError as e:
+        flash(str(e) or "Impossible de mettre à jour la quantité.", 'warning')
+    except Exception:
+        flash("Une erreur est survenue lors de la mise à jour du panier.", 'danger')
+
+    return redirect(url_for('cart.view'))

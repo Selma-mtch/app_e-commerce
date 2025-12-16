@@ -1,19 +1,44 @@
 {% extends 'base.html' %}
 {% block title %}{{ product.name }} — MaBoutique{% endblock %}
 {% block content %}
-  <div class="row g-4">
+  <div class="mb-3">
+    <a href="{{ url_for('catalog.products') }}" class="text-decoration-none text-muted small">
+      ← Retour au catalogue
+    </a>
+  </div>
+
+  <div class="row g-4 align-items-start">
     <div class="col-md-6">
-      <div class="card">
-        <img src="{{ product.image_url or url_for('static', filename='img/default-product.jpg') }}" class="card-img-top" alt="{{ product.name }}">
+      <div class="card product-detail-card">
+        <img
+          src="{{ product.image_url or url_for('static', filename='img/default-product.svg') }}"
+          class="card-img-top product-detail-image"
+          alt="{{ product.name }}"
+        >
       </div>
     </div>
     <div class="col-md-6">
-      <h3 class="mb-2">{{ product.name }}</h3>
-      <p class="text-muted small">Référence : {{ product.id }}</p>
-      <div class="h4 text-primary mb-3">{{ "%.2f"|format(product.price_cents/100) }} €</div>
-      <p>{{ product.description }}</p>
-      {% if current_user.is_authenticated and current_user.is_admin and not product.active %}
-        <span class="badge bg-secondary mb-3">Désactivé</span>
+      <h1 class="h3 mb-2">{{ product.name }}</h1>
+      <p class="text-muted small mb-2">Référence : {{ product.id }}</p>
+
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="h3 text-primary mb-0">
+          {{ "%.2f"|format(product.price_cents/100) }} €
+        </div>
+        {% if product.active %}
+          <span class="badge bg-success-subtle text-success border badge-soft-success">
+            En stock
+          </span>
+        {% else %}
+          <span class="badge bg-secondary">Indisponible</span>
+        {% endif %}
+        {% if current_user.is_authenticated and current_user.is_admin and not product.active %}
+          <span class="badge bg-secondary ms-1">Désactivé (admin)</span>
+        {% endif %}
+      </div>
+
+      {% if product.description %}
+        <p class="mb-4">{{ product.description }}</p>
       {% endif %}
 
       <!-- Formulaire HTMX d'ajout au panier -->
@@ -24,20 +49,38 @@
           hx-target="#cart-count"
           hx-swap="outerHTML"
           hx-on="htmx:afterRequest: showAddedToast()"
-          class="d-flex gap-2"
+          class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-end gap-2 mb-3"
         >
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <input type="number" name="quantity" id="qty" class="form-control w-25" value="1" min="1">
-          <button type="submit" class="btn btn-primary">
-            <i class="bi bi-cart-plus"></i> Ajouter au panier
-          </button>
+          <div class="w-100 w-sm-25" style="max-width: 140px;">
+            <label for="qty" class="form-label small mb-1">Quantité</label>
+            <input
+              type="number"
+              name="quantity"
+              id="qty"
+              class="form-control"
+              value="1"
+              min="1"
+            >
+          </div>
+          <div class="flex-grow-1 d-flex">
+            <button type="submit" class="btn btn-primary w-100">
+              Ajouter au panier
+            </button>
+          </div>
         </form>
       {% else %}
-        <div class="alert alert-warning">Ce produit est désactivé et ne peut pas être ajouté au panier.</div>
+        <div class="alert alert-warning">
+          Ce produit est désactivé et ne peut pas être ajouté au panier.
+        </div>
       {% endif %}
 
       <hr>
-      <small class="text-muted">Livraison estimée: 2-4 jours</small>
+      <div class="small text-muted">
+        <div>✓ Livraison estimée : 2–4 jours</div>
+        <div>✓ Paiement sécurisé (simulation pour le projet)</div>
+        <div>✓ Service client disponible via l'espace Support</div>
+      </div>
     </div>
   </div>
 {% endblock %}

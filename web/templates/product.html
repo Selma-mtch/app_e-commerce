@@ -47,7 +47,9 @@
 
       <!-- Formulaire HTMX d'ajout au panier -->
       {% if product.active %}
-        <form 
+        <form
+          method="post"
+          action="{{ url_for('cart.add', product_id=product.id) }}"
           hx-post="{{ url_for('cart.add', product_id=product.id) }}"
           hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'
           hx-target="#cart-count"

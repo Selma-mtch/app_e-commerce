@@ -10,8 +10,12 @@
   <div class="row g-4 align-items-start">
     <div class="col-md-6">
       <div class="card product-detail-card">
+        {% set img_src = product.image_url %}
+        {% if img_src and not img_src.startswith('http') and not img_src.startswith('/') %}
+          {% set img_src = url_for('static', filename=img_src) %}
+        {% endif %}
         <img
-          src="{{ product.image_url or url_for('static', filename='img/default-product.svg') }}"
+          src="{{ img_src or url_for('static', filename='img/default-product.svg') }}"
           class="card-img-top product-detail-image"
           alt="{{ product.name }}"
         >

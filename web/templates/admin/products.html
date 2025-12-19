@@ -25,10 +25,13 @@
         <td>{{ p.stock_qty }}</td>
         <td>{% if p.active %}<span class="badge bg-success">Oui</span>{% else %}<span class="badge bg-secondary">Non</span>{% endif %}</td>
         <td>
-          <form method="post" action="{{ url_for('admin.toggle_product', product_id=p.id) }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="btn btn-sm btn-outline-primary">{{ 'Désactiver' if p.active else 'Activer' }}</button>
-          </form>
+          <div class="d-flex gap-2">
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.edit_product', product_id=p.id) }}">Modifier</a>
+            <form method="post" action="{{ url_for('admin.toggle_product', product_id=p.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-sm btn-outline-primary">{{ 'Désactiver' if p.active else 'Activer' }}</button>
+            </form>
+          </div>
         </td>
       </tr>
       {% endfor %}

@@ -23,6 +23,7 @@ class Product:
     price_cents: int
     stock_qty: int
     active: bool = True
+    image_url: str | None = None
 
 
 @dataclass

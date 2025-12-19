@@ -1,37 +1,61 @@
 {% extends 'base.html' %}
-{% block title %}Admin — Nouveau produit{% endblock %}
+{% block title %}Admin — {{ 'Nouveau produit' if mode == 'new' else 'Modifier le produit' }}{% endblock %}
 {% block content %}
 <div class="container mt-4">
   <h2 class="mb-4">{{ 'Nouveau produit' if mode == 'new' else 'Modifier le produit' }}</h2>
 
-  <form method="post" action="">
+  <form method="post" action="" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <div class="mb-3">
       <label class="form-label">Nom</label>
-      <input type="text" name="name" class="form-control" required>
+      <input type="text" name="name" class="form-control" required value="{{ product.name if product else '' }}">
     </div>
 
     <div class="mb-3">
       <label class="form-label">Description</label>
-      <textarea name="description" class="form-control" rows="4" required></textarea>
+      <textarea name="description" class="form-control" rows="4" required>{{ product.description if product else '' }}</textarea>
     </div>
 
     <div class="row g-3">
       <div class="col-md-4">
         <label class="form-label">Prix (€)</label>
-        <input type="number" step="0.01" min="0" name="price_eur" class="form-control" required>
+        <input type="number" step="0.01" min="0" name="price_eur" class="form-control" required value="{{ (product.price_cents / 100) if product else '' }}">
       </div>
       <div class="col-md-4">
         <label class="form-label">Stock</label>
-        <input type="number" min="0" name="stock_qty" class="form-control" required>
+        <input type="number" min="0" name="stock_qty" class="form-control" required value="{{ product.stock_qty if product else '' }}">
       </div>
       <div class="col-md-4 d-flex align-items-end">
         <div class="form-check">
-          <input class="form-check-input" type="checkbox" name="active" id="active" checked>
+          <input class="form-check-input" type="checkbox" name="active" id="active" {% if product %}{% if product.active %}checked{% endif %}{% else %}checked{% endif %}>
           <label class="form-check-label" for="active">Actif</label>
         </div>
       </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Image actuelle</label>
+      {% if product and product.image_url %}
+        <div class="mb-2">
+          <img src="{{ url_for('static', filename=product.image_url) }}" alt="Image produit" style="max-width:200px; max-height:200px; object-fit:contain;" />
+        </div>
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" name="remove_image" id="remove_image">
+          <label class="form-check-label" for="remove_image">Supprimer l'image actuelle</label>
+        </div>
+      {% else %}
+        <div class="text-muted">Aucune image renseignée.</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Nouvelle image (fichier)</label>
+      <input class="form-control" type="file" name="image_file" accept="image/*">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">ou URL d'image (externe)</label>
+      <input type="url" name="image_url" class="form-control" placeholder="https://..." value="{{ product.image_url if product and product.image_url and product.image_url.startswith('http') else '' }}">
     </div>
 
     <div class="mt-4 d-flex gap-2">

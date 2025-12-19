@@ -10,6 +10,11 @@ class Config:
     TESTING = False
     LOAD_SAMPLE_DATA = True
     DB_AUTO_CREATE = True  # crée les tables si nécessaire quand la DB est active
+    # Uploads configuration (saved under the Flask `static` folder by default)
+    UPLOADS_SUBDIR = 'uploads'
+    # Base url path used when building public URLs; typically 'static' so
+    # uploaded files are served with `url_for('static', filename=...)`.
+    UPLOADS_URL_BASE = 'static'
 
 
 class DevelopmentConfig(Config):

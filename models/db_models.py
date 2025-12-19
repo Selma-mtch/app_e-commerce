@@ -14,6 +14,8 @@ class ProductDB(Base):
     stock_qty: Mapped[int] = mapped_column(Integer, nullable=False)
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
+    image_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+
 
 class UserDB(Base):
     __tablename__ = "users"

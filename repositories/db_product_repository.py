@@ -26,6 +26,7 @@ class ProductRepositoryDB:
                 obj.price_cents = product.price_cents
                 obj.stock_qty = product.stock_qty
                 obj.active = product.active
+                obj.image_url = product.image_url
             else:
                 obj = ProductDB(
                     id=product.id,
@@ -34,6 +35,7 @@ class ProductRepositoryDB:
                     price_cents=product.price_cents,
                     stock_qty=product.stock_qty,
                     active=product.active,
+                    image_url=product.image_url,
                 )
                 s.add(obj)
             s.commit()
@@ -51,6 +53,7 @@ class ProductRepositoryDB:
                 price_cents=row.price_cents,
                 stock_qty=row.stock_qty,
                 active=row.active,
+                image_url=row.image_url,
             )
 
     def list_active(self) -> list[Product]:
@@ -65,6 +68,7 @@ class ProductRepositoryDB:
                     price_cents=r.price_cents,
                     stock_qty=r.stock_qty,
                     active=r.active,
+                    image_url=r.image_url,
                 )
                 for r in rows
             ]
@@ -81,6 +85,7 @@ class ProductRepositoryDB:
                     price_cents=r.price_cents,
                     stock_qty=r.stock_qty,
                     active=r.active,
+                    image_url=r.image_url,
                 )
                 for r in rows
             ]

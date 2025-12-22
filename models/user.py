@@ -21,6 +21,7 @@ class User(UserMixin):
     first_name: str
     last_name: str
     address: str
+    address_id: str | None = None
     is_admin: bool = False
 
     def update_profile(self, **fields):

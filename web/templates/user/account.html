@@ -2,85 +2,208 @@
 {% block title %}Mon compte{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-header bg-primary text-white text-center rounded-top-4">
-          <h4 class="mb-0">Mon compte</h4>
+{% set addr = address_fields or {} %}
+<div class="container py-4 py-lg-5">
+  <div class="account-hero card shadow-sm border-0 overflow-hidden mb-4">
+    <div class="account-hero__banner d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <div class="avatar-initials bg-white text-primary fw-semibold">
+          {{ current_user.first_name[0]|upper }}{{ current_user.last_name[0]|upper }}
         </div>
-        <div class="card-body bg-light">
-          <div class="d-flex align-items-center mb-3">
-            <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center me-3" style="width:60px; height:60px; font-size:1.5rem;">
-              {{ current_user.first_name[0]|upper }}{{ current_user.last_name[0]|upper }}
-            </div>
+        <div>
+          <div class="text-white-50 small">Profil client</div>
+          <h4 class="text-white mb-1">{{ current_user.first_name }} {{ current_user.last_name }}</h4>
+          <div class="d-flex flex-wrap gap-3 align-items-center text-white-50 small">
+            <span class="badge bg-white text-primary">Compte actif</span>
+            <span>{{ current_user.email }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('orders.list_orders') }}" class="btn btn-light btn-sm">Mes commandes</a>
+        <a href="{{ url_for('catalog.products') }}" class="btn btn-outline-light btn-sm">Continuer mes achats</a>
+      </div>
+    </div>
+    <div class="row g-3 g-lg-4 p-3 p-lg-4 bg-white">
+      <div class="col-md-4">
+        <div class="info-chip h-100">
+          <div class="small text-muted mb-1">Email de connexion</div>
+          <div class="fw-semibold text-dark">{{ current_user.email }}</div>
+          <div class="text-muted small mt-1">Utilisé pour les notifications et la connexion.</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-chip h-100">
+          <div class="small text-muted mb-1">Adresse de livraison</div>
+          <div class="fw-semibold text-dark lh-sm">
+            {% if current_user.address %}
+              {% set lines = (current_user.address.replace('\\r','').replace('\\n','\n').split('\n')) %}
+              {{ lines[0] if lines|length > 0 else "" }}<br>
+              {% if lines|length > 1 %}
+                {{ lines[1] }}<br>
+              {% endif %}
+              {% if lines|length > 2 %}
+                {{ lines[2] }}
+              {% endif %}
+            {% else %}
+              Ajoutez votre adresse pour vos prochaines commandes
+            {% endif %}
+          </div>
+          <div class="text-muted small mt-1">Modifiez-la pour accélérer vos paiements.</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-chip h-100">
+          <div class="small text-muted mb-1">Sécurité</div>
+          <div class="fw-semibold text-dark">Mot de passe protégé</div>
+          <div class="text-muted small mt-1">Gardez vos informations à jour pour sécuriser votre compte.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="card section-card shadow-sm border-0 h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-3">
             <div>
-              <h5 class="mb-0">{{ current_user.first_name }} {{ current_user.last_name }}</h5>
-              <small class="text-muted">{{ current_user.email }}</small>
+              <h5 class="mb-1">Informations personnelles</h5>
+              <p class="text-muted small mb-0">Mettez à jour votre nom et votre adresse de livraison.</p>
             </div>
+            <div class="icon-badge">👤</div>
           </div>
-
-          <hr>
-
-          <div class="mb-3">
-            <h6 class="text-secondary">Adresse :</h6>
-            <form method="post" class="d-flex align-items-center" action="{{ url_for('auth.profile') }}">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <input type="hidden" name="action" value="update_profile">
-              <input type="text" class="form-control me-2" name="address" value="{{ current_user.address or '' }}" placeholder="Votre adresse">
-              <button type="submit" class="btn btn-primary">Mettre à jour</button>
-            </form>
-          </div>
-
-          <hr>
-
-          <div class="mb-3">
-            <h6 class="text-secondary">Changer d'adresse email :</h6>
-            <form method="post" action="{{ url_for('auth.profile') }}" class="row g-2">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <input type="hidden" name="action" value="change_email">
-              <div class="col-md-6">
-                <input type="email" class="form-control" name="new_email" placeholder="Nouvel email" required>
-              </div>
-              <div class="col-md-6">
-                <input type="password" class="form-control" name="current_password" placeholder="Mot de passe actuel" required>
-              </div>
-              <div class="col-12">
-                <button type="submit" class="btn btn-primary">Mettre à jour l'email</button>
-              </div>
-            </form>
-          </div>
-
-          <hr>
-
-          <div class="mb-3">
-            <h6 class="text-secondary">Changer de mot de passe :</h6>
-            <form method="post" action="{{ url_for('auth.profile') }}" class="row g-2">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <input type="hidden" name="action" value="change_password">
-              <div class="col-md-4">
-                <input type="password" class="form-control" name="current_password" placeholder="Mot de passe actuel" required>
-              </div>
-              <div class="col-md-4">
-                <input type="password" class="form-control" name="new_password" placeholder="Nouveau mot de passe (min 8)" minlength="8" required>
-              </div>
-              <div class="col-md-4">
-                <input type="password" class="form-control" name="confirm_password" placeholder="Confirmer le nouveau" minlength="8" required>
-              </div>
-              <div class="col-12">
-                <button type="submit" class="btn btn-primary">Mettre à jour le mot de passe</button>
-              </div>
-            </form>
-          </div>
-
-
-          <div class="text-center mt-4">
-            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger px-4">Se déconnecter</a>
-            <a href="{{ url_for('catalog.products') }}" class="btn btn-primary px-4 ms-2">Retour à la boutique</a>
-            <a href="{{ url_for('orders.list_orders') }}" class="btn btn-success px-4 ms-2">Mes commandes</a>
-          </div>
-          </div>
+          <form method="post" action="{{ url_for('auth.profile') }}" class="row g-3">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="update_profile">
+            <div class="col-md-6">
+              <label class="form-label small text-muted">Prénom</label>
+              <input type="text" class="form-control" name="first_name" value="{{ current_user.first_name }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small text-muted">Nom</label>
+              <input type="text" class="form-control" name="last_name" value="{{ current_user.last_name }}" required>
+            </div>
+            <div class="col-12 address-autocomplete position-relative">
+              <label class="form-label small text-muted">Adresse (numéro et voie)</label>
+              <input
+                id="address_street"
+                type="text"
+                class="form-control"
+                name="address_street"
+                value="{{ addr.street or '' }}"
+                placeholder="10 Rue de la Paix"
+                required
+                data-addr-autocomplete="fr"
+                data-addr-line2="#address_line2"
+                data-addr-postal="#address_postal_code"
+                data-addr-city="#address_city"
+                data-addr-country="#address_country"
+              >
+              <div class="address-suggestions dropdown-menu shadow-sm w-100" data-addr-results></div>
+            </div>
+            <div class="col-12">
+              <label class="form-label small text-muted">Complément (bâtiment, étage)</label>
+              <input id="address_line2" type="text" class="form-control" name="address_line2" value="{{ addr.line2 or '' }}" placeholder="Bâtiment B, 3e étage">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small text-muted">Code postal</label>
+              <input id="address_postal_code" type="text" class="form-control" name="address_postal_code" value="{{ addr.postal_code or '' }}" placeholder="75001" minlength="4" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small text-muted">Ville</label>
+              <input id="address_city" type="text" class="form-control" name="address_city" value="{{ addr.city or '' }}" placeholder="Paris" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small text-muted">Pays</label>
+              <input id="address_country" type="text" class="form-control" name="address_country" value="{{ addr.country or 'France' }}" placeholder="France">
+            </div>
+            <div class="col-12 text-muted small">
+              Fournissez une adresse complète pour éviter les retards de livraison.
+            </div>
+            <div class="col-12 d-flex justify-content-end gap-2">
+              <a href="{{ url_for('catalog.products') }}" class="btn btn-outline-secondary">Annuler</a>
+              <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </div>
+          </form>
         </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card section-card shadow-sm border-0 mb-4 mb-lg-3">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <div>
+              <h5 class="mb-1">Adresse email</h5>
+              <p class="text-muted small mb-0">Changer d'email nécessite votre mot de passe actuel.</p>
+            </div>
+            <div class="icon-badge">✉️</div>
+          </div>
+          <form method="post" action="{{ url_for('auth.profile') }}" class="row g-3">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="change_email">
+            <div class="col-md-6">
+              <label class="form-label small text-muted">Nouvel email</label>
+              <input type="email" class="form-control" name="new_email" placeholder="exemple@domaine.com" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small text-muted">Mot de passe actuel</label>
+              <input type="password" class="form-control" name="current_password" placeholder="••••••••" required>
+            </div>
+            <div class="col-12 text-end">
+              <button type="submit" class="btn btn-primary">Mettre à jour l'email</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card section-card shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <div>
+              <h5 class="mb-1">Sécurité</h5>
+              <p class="text-muted small mb-0">Choisissez un mot de passe long avec chiffres et symboles.</p>
+            </div>
+            <div class="icon-badge">🔒</div>
+          </div>
+          <form method="post" action="{{ url_for('auth.profile') }}" class="row g-3">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="change_password">
+            <div class="col-md-4">
+              <label class="form-label small text-muted">Mot de passe actuel</label>
+              <input type="password" class="form-control" name="current_password" placeholder="••••••••" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small text-muted">Nouveau mot de passe</label>
+              <input type="password" class="form-control" name="new_password" minlength="8" placeholder="••••••••" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small text-muted">Confirmation</label>
+              <input type="password" class="form-control" name="confirm_password" minlength="8" placeholder="••••••••" required>
+            </div>
+            <div class="col-12">
+              <div class="text-muted small">Le nouveau mot de passe doit comporter au moins 8 caractères.</div>
+            </div>
+            <div class="col-12 text-end">
+              <button type="submit" class="btn btn-primary">Mettre à jour le mot de passe</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card section-card shadow-sm border-0 mt-4">
+    <div class="card-body d-flex flex-wrap gap-2 justify-content-between align-items-center">
+      <div>
+        <h6 class="mb-1">Actions rapides</h6>
+        <p class="text-muted small mb-0">Gérez vos commandes, continuez vos achats ou déconnectez-vous.</p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('orders.list_orders') }}" class="btn btn-outline-primary">Voir mes commandes</a>
+        <a href="{{ url_for('catalog.products') }}" class="btn btn-primary">Retour à la boutique</a>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger">Se déconnecter</a>
       </div>
     </div>
   </div>

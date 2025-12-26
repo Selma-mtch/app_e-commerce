@@ -21,6 +21,37 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+// Empêcher la saisie d'une date de carte expirée (client-side)
+document.addEventListener("DOMContentLoaded", () => {
+  const expYearInput = document.getElementById("exp_year");
+  const expMonthInput = document.getElementById("exp_month");
+  if (!expYearInput || !expMonthInput) return;
+
+  const updateExpValidity = () => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    const year = parseInt(expYearInput.value, 10);
+    const month = parseInt(expMonthInput.value, 10);
+
+    // Ajuste le min du mois si l'année courante est choisie
+    expMonthInput.min = year === currentYear ? String(currentMonth) : "1";
+
+    let message = "";
+    if (!Number.isNaN(year) && !Number.isNaN(month)) {
+      if (year < currentYear || (year === currentYear && month < currentMonth)) {
+        message = "Carte expirée (mois déjà passé).";
+      }
+    }
+    expMonthInput.setCustomValidity(message);
+    expYearInput.setCustomValidity(message);
+  };
+
+  expYearInput.addEventListener("input", updateExpValidity);
+  expMonthInput.addEventListener("input", updateExpValidity);
+  updateExpValidity();
+});
+
 // HTMX: le token CSRF est injecté côté base.html; pas d'action ici.
 
 // Petite notification après ajout panier (évite les erreurs si la fonction est appelée côté templates)

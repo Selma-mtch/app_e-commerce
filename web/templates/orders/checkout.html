@@ -3,41 +3,174 @@
 {% block title %}Passer la commande — MaBoutique{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">🛒 Passer la commande</h2>
+<div class="container mt-4">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div class="badge bg-primary-subtle text-primary fw-semibold">Étape 2/2</div>
+    <div>
+      <h1 class="h4 mb-0">Finaliser mon achat</h1>
+      <p class="text-muted small mb-0">Vérifiez vos informations puis payez en toute sécurité.</p>
+    </div>
+  </div>
 
-    {% if total %}
-        <div class="card p-4 mb-4">
-            <h4>Total à payer : <strong>{{ "%.2f"|format(total) }} €</strong></h4>
-        </div>
+  {% if total %}
+    <div class="row g-4 align-items-start">
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <form action="{{ url_for('orders.checkout') }}" method="post">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-        <form action="{{ url_for('orders.checkout') }}" method="post">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="mb-3">
-                <label for="card_number" class="form-label">Numéro de carte</label>
-                <input type="text" class="form-control" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" required>
-            </div>
+              <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h5 class="mb-0">Adresse de livraison</h5>
+                  <span class="text-muted small">Champ requis</span>
+                </div>
+                <div class="row g-3">
+                  <div class="col-12 address-autocomplete position-relative">
+                    <label class="form-label">Adresse complète</label>
+                    <input
+                      id="checkout_address"
+                      name="address"
+                      class="form-control"
+                      placeholder="12 rue des Fleurs, Apt 4B"
+                      value="{{ (addr_fields.street ~ (' ' ~ addr_fields.line2 if addr_fields.line2 else ''))|trim }}"
+                      maxlength="200"
+                      required
+                      data-addr-autocomplete="fr"
+                      data-addr-postal="#checkout_zip"
+                      data-addr-city="#checkout_city"
+                      data-addr-country="#checkout_country"
+                    >
+                    <div class="address-suggestions dropdown-menu shadow-sm w-100" data-addr-results></div>
+                  </div>
+                  <div class="col-sm-6">
+                    <label class="form-label">Ville</label>
+                    <input id="checkout_city" name="city" class="form-control" placeholder="Paris" value="{{ addr_fields.city }}" maxlength="100">
+                  </div>
+                  <div class="col-sm-3">
+                    <label class="form-label">Code postal</label>
+                    <input id="checkout_zip" name="zip" class="form-control" placeholder="75000" value="{{ addr_fields.postal_code }}" maxlength="20">
+                  </div>
+                  <div class="col-sm-3">
+                    <label class="form-label">Pays</label>
+                    <input id="checkout_country" name="country" class="form-control" value="{{ addr_fields.country or 'France' }}" maxlength="60">
+                  </div>
+                </div>
+              </div>
 
-            <div class="row mb-3">
-                <div class="col">
+              <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h5 class="mb-0">Coordonnées</h5>
+                  <span class="text-muted small">Pour la confirmation de commande</span>
+                </div>
+                <div class="row g-3">
+                  <div class="col-sm-6">
+                    <label class="form-label">Nom complet</label>
+                    <input name="full_name" class="form-control" placeholder="Nom et prénom" value="{{ full_name_prefill }}" maxlength="120">
+                  </div>
+                  <div class="col-sm-6">
+                    <label class="form-label">Téléphone</label>
+                    <input name="phone" class="form-control" placeholder="+33 6 12 34 56 78" maxlength="30">
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" placeholder="vous@example.com" value="{{ current_user.email if current_user else '' }}">
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h5 class="mb-0">Carte bancaire</h5>
+                  <span class="text-muted small">Paiement sécurisé</span>
+                </div>
+                <div class="mb-3">
+                  <label for="card_number" class="form-label">Numéro de carte</label>
+                  <input type="text" class="form-control" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" inputmode="numeric" autocomplete="cc-number" pattern="[0-9]{13,19}" maxlength="19" required>
+                </div>
+                <div class="row g-3">
+                  <div class="col-sm-4">
                     <label for="exp_month" class="form-label">Mois d'expiration</label>
-                    <input type="number" class="form-control" id="exp_month" name="exp_month" min="1" max="12" required>
-                </div>
-                <div class="col">
-                    <label for="exp_year" class="form-label">Année d'expiration</label>
-                    <input type="number" class="form-control" id="exp_year" name="exp_year" min="2025" max="2100" required>
-                </div>
-                <div class="col">
+                    <input type="number" class="form-control" id="exp_month" name="exp_month" min="1" max="12" placeholder="MM" required>
+                  </div>
+                  <div class="col-sm-4">
+                    <label for="exp_year" class="form-label">Année</label>
+                    <input type="number" class="form-control" id="exp_year" name="exp_year" min="{{ current_year }}" max="{{ current_year + 20 }}" data-current-month="{{ current_month }}" placeholder="YYYY" required>
+                  </div>
+                  <div class="col-sm-4">
                     <label for="cvc" class="form-label">CVC</label>
-                    <input type="text" class="form-control" id="cvc" name="cvc" placeholder="123" maxlength="4" required>
+                    <input type="text" class="form-control" id="cvc" name="cvc" placeholder="123" maxlength="4" pattern="[0-9]{3,4}" inputmode="numeric" autocomplete="cc-csc" required>
+                  </div>
                 </div>
+                <div class="form-text mt-2">Nous ne stockons pas vos données de carte.</div>
+              </div>
+
+              <div class="d-flex flex-column flex-sm-row gap-2 mt-3">
+                <button type="submit" class="btn btn-primary flex-grow-1">
+                  Payer {{ "%.2f"|format(total) }} €
+                </button>
+                <a href="{{ url_for('cart.view') }}" class="btn btn-outline-secondary">Retour au panier</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h5 class="mb-0">Résumé de la commande</h5>
+                <p class="text-muted small mb-0">Vérifiez les articles avant paiement.</p>
+              </div>
+              <span class="badge bg-primary-subtle text-primary">Total {{ "%.2f"|format(total) }} €</span>
             </div>
 
-            <button type="submit" class="btn btn-success">Payer {{ "%.2f"|format(total) }} €</button>
-            <a href="{{ url_for('cart.view') }}" class="btn btn-secondary ms-2">Retour au panier</a>
-        </form>
-    {% else %}
-        <div class="alert alert-info">Votre panier est vide. <a href="{{ url_for('catalog.products') }}">Voir les produits</a></div>
-    {% endif %}
+            {% if items %}
+              <div class="list-group list-group-flush mb-3">
+                {% for it in items %}
+                  <div class="list-group-item px-0 d-flex justify-content-between align-items-start">
+                    <div class="me-3">
+                      <div class="fw-semibold">{{ it.product.name }}</div>
+                      <div class="text-muted small">Qté: {{ it.quantity }}</div>
+                    </div>
+                    <div class="text-end">
+                      <div class="fw-semibold">{{ "%.2f"|format(it.subtotal) }} €</div>
+                      <div class="text-muted small">{{ "%.2f"|format(it.price) }} € / u.</div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="text-muted">Aucun article dans le panier.</p>
+            {% endif %}
+
+            <div class="border-top pt-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted">Sous-total</span>
+                <span>{{ "%.2f"|format(total) }} €</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted">Livraison</span>
+                <span class="text-success">Offerte</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center fw-bold h5 mb-0">
+                <span>Total à payer</span>
+                <span>{{ "%.2f"|format(total) }} €</span>
+              </div>
+            </div>
+
+            <div class="alert alert-light border mt-3 mb-0 small">
+              <div class="fw-semibold mb-1">Paiement sécurisé</div>
+              Vos informations sont chiffrées et ne sont jamais partagées.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info">Votre panier est vide. <a href="{{ url_for('catalog.products') }}">Voir les produits</a></div>
+  {% endif %}
 </div>
 {% endblock %}

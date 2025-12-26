@@ -258,6 +258,17 @@ footer {
   z-index: 1050;
 }
 
+/* --- Commandes --- */
+.order-card .order-id {
+  letter-spacing: 0.5px;
+}
+.order-card .badge {
+  font-weight: 600;
+}
+.order-card .card-body {
+  padding: 1.1rem 1.25rem;
+}
+
 @media (max-width: 768px) {
   .account-hero__banner {
     padding: 1.25rem;

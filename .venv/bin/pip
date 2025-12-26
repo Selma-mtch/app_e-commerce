@@ -1,4 +1,4 @@
-#!/home/selma/BUT3/qualite_dev/app_e-commerce/.venv/bin/python3
+#!/home/selma/BUT3/app/app_e-commerce/.venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

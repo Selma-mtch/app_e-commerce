@@ -12,9 +12,19 @@
     <p class="card-text text-muted small mb-2">{{ product.description }}</p>
     <div class="mt-auto d-flex align-items-center justify-content-between">
       <div class="fw-bold">{{ "%.2f"|format((product.price_cents or 0) / 100) }} €</div>
-      <div>
+      <div class="d-flex gap-1">
         {% if product.active %}
-          <button class="btn btn-sm btn-outline-primary" hx-post="{{ url_for('cart.add', product_id=product.id) }}" hx-swap="none" hx-trigger="click" hx-on="htmx:afterRequest: showAddedToast()" hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'>Ajouter</button>
+          <form method="post"
+                action="{{ url_for('cart.add', product_id=product.id) }}"
+                hx-post="{{ url_for('cart.add', product_id=product.id) }}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'
+                hx-target="#cart-count"
+                hx-swap="outerHTML"
+                hx-on="htmx:afterRequest: showAddedToast()"
+                class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-outline-primary" type="submit">Ajouter</button>
+          </form>
         {% else %}
           <button class="btn btn-sm btn-outline-secondary" disabled>Désactivé</button>
         {% endif %}

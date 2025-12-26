@@ -3,6 +3,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from flask_login import login_user, logout_user, login_required
 
+from web.utils.address import parse_address_fields, build_address_string
+
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
@@ -69,11 +71,21 @@ def profile():
         action = request.form.get('action')
         try:
             if action == 'update_profile':
+                street = request.form.get('address_street', '').strip()
+                line2 = request.form.get('address_line2', '').strip()
+                postal_code = request.form.get('address_postal_code', '').strip()
+                city = request.form.get('address_city', '').strip()
+                country = request.form.get('address_country', '').strip() or "France"
+
+                if not street or not postal_code or not city:
+                    raise ValueError("Merci de renseigner au minimum la voie, le code postal et la ville.")
+
+                formatted_address = build_address_string(street, line2, postal_code, city, country)
                 # Mettre à jour uniquement les champs autorisés
                 user.update_profile(
                     first_name=request.form.get('first_name', user.first_name),
                     last_name=request.form.get('last_name', user.last_name),
-                    address=request.form.get('address', user.address)
+                    address=formatted_address
                 )
                 # Persister les changements (utile notamment en mode DB)
                 current_app.users_repo.add(user)
@@ -97,4 +109,5 @@ def profile():
         except Exception as e:
             flash(f"Erreur lors de la mise à jour : {str(e)}", "danger")
 
-    return render_template('user/account.html', current_user=user)
+    address_fields = parse_address_fields(user.address)
+    return render_template('user/account.html', current_user=user, address_fields=address_fields)

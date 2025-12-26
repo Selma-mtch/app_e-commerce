@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV /home/selma/BUT3/qualite_dev/app_e-commerce/.venv
+set -gx VIRTUAL_ENV /home/selma/BUT3/app/app_e-commerce/.venv
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"bin $PATH

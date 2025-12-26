@@ -52,7 +52,13 @@
               <div class="fw-bold h5 mb-0 text-primary">
                 {{ "%.2f"|format(product.price_cents / 100) }} €
               </div>
-              <form method="post" action="{{ url_for('cart.add', product_id=product.id) }}">
+              <form method="post"
+                    action="{{ url_for('cart.add', product_id=product.id) }}"
+                    hx-post="{{ url_for('cart.add', product_id=product.id) }}"
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'
+                    hx-target="#cart-count"
+                    hx-swap="outerHTML"
+                    hx-on="htmx:afterRequest: showAddedToast()">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-primary w-100 btn-sm">
                   Ajouter au panier

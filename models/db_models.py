@@ -16,6 +16,16 @@ class ProductDB(Base):
 
     image_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
 
+class AddressDB(Base):
+    __tablename__ = "addresses"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    street: Mapped[str] = mapped_column(String(255), nullable=False)
+    line2: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    postal_code: Mapped[str] = mapped_column(String(32), nullable=False)
+    city: Mapped[str] = mapped_column(String(128), nullable=False)
+    country: Mapped[str] = mapped_column(String(128), nullable=False, default="France")
+
 
 class UserDB(Base):
     __tablename__ = "users"
@@ -25,7 +35,9 @@ class UserDB(Base):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     first_name: Mapped[str] = mapped_column(String(100), nullable=False)
     last_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    address: Mapped[str] = mapped_column(String(500), nullable=False)
+    # Colonne historique pour compatibilité, laissée nullable
+    address: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    address_id: Mapped[str | None] = mapped_column(String(64), ForeignKey("addresses.id"), nullable=True)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
 

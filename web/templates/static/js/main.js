@@ -4,6 +4,23 @@ document.addEventListener("DOMContentLoaded", function() {
   toastElList.forEach(toastEl => new bootstrap.Toast(toastEl).show());
 });
 
+// Navigation carte produit: clic global redirige, bouton panier ignoré
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".product-card[data-product-url]").forEach((card) => {
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("[data-ignore-card-nav]")) return;
+      const url = card.dataset.productUrl;
+      if (url) {
+        window.location.href = url;
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-ignore-card-nav]").forEach((el) => {
+    el.addEventListener("click", (event) => event.stopPropagation());
+  });
+});
+
 // HTMX: le token CSRF est injecté côté base.html; pas d'action ici.
 
 // Petite notification après ajout panier (évite les erreurs si la fonction est appelée côté templates)

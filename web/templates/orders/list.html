@@ -3,30 +3,63 @@
 {% block title %}Mes commandes — MaBoutique{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">📦 Mes commandes</h2>
+{% set badge_classes = {
+  'PAYEE': 'success',
+  'LIVREE': 'success',
+  'EXPEDIEE': 'info',
+  'VALIDEE': 'primary',
+  'CREE': 'secondary',
+  'ANNULEE': 'secondary',
+  'REMBOURSEE': 'warning'
+} %}
 
+<div class="container py-4 py-lg-5">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+    <div>
+      <h1 class="h4 mb-1">📦 Mes commandes</h1>
+      <p class="text-muted small mb-0">Suivez vos achats, leurs statuts et leurs montants.</p>
+    </div>
     {% if orders %}
-        <div class="list-group">
-            {% for order in orders %}
-                <a href="{{ url_for('orders.detail', order_id=order.id) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>Commande {{ order.id[:8] }}…</strong> — Créée le {{ order.created_at|datetimeformat }}
-                        <br>
-                        {% if order.status %}
-                            <span class="badge bg-primary">{{ order.status.name }}</span>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <strong>{{ "%.2f"|format(order.total_cents()/100) }} €</strong>
-                    </div>
-                </a>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="alert alert-info">
-            Vous n'avez aucune commande. <a href="{{ url_for('catalog.products') }}">Voir les produits</a>
-        </div>
+      <span class="badge bg-primary-subtle text-primary px-3 py-2">{{ orders|length }} commande{% if orders|length > 1 %}s{% endif %}</span>
     {% endif %}
+  </div>
+
+  {% if orders %}
+    <div class="row g-3 g-lg-4">
+      {% for order in orders %}
+        <div class="col-12">
+          <div class="card order-card shadow-sm border-0">
+            <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+              <div class="d-flex align-items-center gap-3">
+                <div class="order-id badge bg-light text-dark fw-semibold">#{{ order.id[:8] }}</div>
+                <div>
+                  <div class="fw-semibold mb-1">Créée le {{ order.created_at|datetimeformat }}</div>
+                  <div class="text-muted small">Articles : {{ order.items|length }} • Total : {{ "%.2f"|format(order.total_cents()/100) }} €</div>
+                </div>
+              </div>
+
+              <div class="d-flex align-items-center gap-2">
+                {% if order.status %}
+                  {% set cls = badge_classes.get(order.status.name, 'secondary') %}
+                  <span class="badge bg-{{ cls }} text-uppercase">{{ order.status.name }}</span>
+                {% endif %}
+                <a class="btn btn-outline-primary btn-sm" href="{{ url_for('orders.detail', order_id=order.id) }}">Voir le détail</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card shadow-sm border-0">
+      <div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <div>
+          <h5 class="mb-1">Vous n'avez aucune commande</h5>
+          <p class="text-muted mb-0">Parcourez le catalogue et commencez vos achats.</p>
+        </div>
+        <a href="{{ url_for('catalog.products') }}" class="btn btn-primary">Voir les produits</a>
+      </div>
+    </div>
+  {% endif %}
 </div>
 {% endblock %}

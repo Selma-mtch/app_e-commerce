@@ -424,13 +424,13 @@ def new_product():
                 year = datetime.utcnow().strftime('%Y')
                 month = datetime.utcnow().strftime('%m')
                 fname = f"{uuid.uuid4()}.{ext}"
-                rel_dir = os.path.join('uploads', year, month)
+                rel_dir = os.path.join(current_app.config.get('UPLOADS_SUBDIR', 'uploads'), year, month)
                 save_dir = os.path.join(current_app.static_folder, rel_dir)
                 os.makedirs(save_dir, exist_ok=True)
                 save_path = os.path.join(save_dir, fname)
                 image_file.save(save_path)
                 # stocker chemin relatif utilisé par templates via url_for('static', filename=...)
-                p.image_url = os.path.join('uploads', year, month, fname).replace('\\', '/')
+                p.image_url = os.path.join(current_app.config.get('UPLOADS_SUBDIR', 'uploads'), year, month, fname).replace('\\', '/')
         try:
             current_app.products_repo.add(p)
             flash('Produit créé avec succès.', 'success')
@@ -440,6 +440,74 @@ def new_product():
             return render_template('admin/product_form.html', mode='new')
 
     return render_template('admin/product_form.html', mode='new')
+
+
+@admin_bp.route('/products/<product_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def edit_product(product_id):
+    """Modification d'un produit existant (infos + image)."""
+    product = current_app.products_repo.get(product_id)
+    if not product:
+        flash('Produit introuvable.', 'danger')
+        return redirect(url_for('admin.products'))
+
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        description = request.form.get('description', '').strip()
+        price_eur = request.form.get('price_eur', '').strip()
+        stock_qty = request.form.get('stock_qty', '').strip()
+        active = True if request.form.get('active') == 'on' else False
+
+        if not name or not description or not price_eur or not stock_qty:
+            flash('Tous les champs obligatoires doivent être remplis.', 'danger')
+            return render_template('admin/product_form.html', mode='edit', product=product)
+        try:
+            price_cents = int(round(float(price_eur.replace(',', '.')) * 100))
+            qty = int(stock_qty)
+            if price_cents < 0 or qty < 0:
+                raise ValueError
+        except Exception:
+            flash("Prix ou stock invalide.", 'danger')
+            return render_template('admin/product_form.html', mode='edit', product=product)
+
+        # Mise à jour des champs de base
+        product.name = name
+        product.description = description
+        product.price_cents = price_cents
+        product.stock_qty = qty
+        product.active = active
+
+        # Gestion de l'image
+        image_field_url = request.form.get('image_url', '').strip()
+        image_file = request.files.get('image_file') if 'image_file' in request.files else None
+        remove_image = request.form.get('remove_image') == 'on'
+        if image_field_url:
+            product.image_url = image_field_url
+        elif image_file and getattr(image_file, 'filename', ''):
+            filename = secure_filename(image_file.filename)
+            ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
+            if ext and ext in ALLOWED_IMAGE_EXTENSIONS:
+                year = datetime.utcnow().strftime('%Y')
+                month = datetime.utcnow().strftime('%m')
+                fname = f"{uuid.uuid4()}.{ext}"
+                rel_dir = os.path.join(current_app.config.get('UPLOADS_SUBDIR', 'uploads'), year, month)
+                save_dir = os.path.join(current_app.static_folder, rel_dir)
+                os.makedirs(save_dir, exist_ok=True)
+                save_path = os.path.join(save_dir, fname)
+                image_file.save(save_path)
+                product.image_url = os.path.join(current_app.config.get('UPLOADS_SUBDIR', 'uploads'), year, month, fname).replace('\\', '/')
+        elif remove_image:
+            product.image_url = None
+
+        try:
+            current_app.products_repo.add(product)
+            flash('Produit mis à jour.', 'success')
+            return redirect(url_for('admin.products'))
+        except Exception as e:
+            flash(f"Erreur lors de la mise à jour: {e}", 'danger')
+            return render_template('admin/product_form.html', mode='edit', product=product)
+
+    return render_template('admin/product_form.html', mode='edit', product=product)
 
 
 @admin_bp.route('/products/<product_id>/toggle', methods=['POST'])

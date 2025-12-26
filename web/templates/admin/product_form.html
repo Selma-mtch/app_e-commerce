@@ -38,7 +38,8 @@
       <label class="form-label">Image actuelle</label>
       {% if product and product.image_url %}
         <div class="mb-2">
-          <img src="{{ url_for('static', filename=product.image_url) }}" alt="Image produit" style="max-width:200px; max-height:200px; object-fit:contain;" />
+          {% set img_src = product.image_url %}
+          <img src="{{ img_src if img_src.startswith('http') else url_for('static', filename=img_src) }}" alt="Image produit" style="max-width:200px; max-height:200px; object-fit:contain;" />
         </div>
         <div class="form-check mb-2">
           <input class="form-check-input" type="checkbox" name="remove_image" id="remove_image">
@@ -65,4 +66,3 @@
   </form>
 </div>
 {% endblock %}
-
